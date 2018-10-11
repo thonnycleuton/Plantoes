@@ -6,8 +6,16 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.generic import ListView
 
-from sorteio.models import Comarca
+from sorteio.models import *
 
 
 class ComarcaList(ListView):
     model = Comarca
+
+
+class DefensorList(ListView):
+    model = Defensor
+
+
+class FeriadoList(ListView):
+    model = Feriado
