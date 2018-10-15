@@ -9,6 +9,10 @@ from django.views.generic import ListView
 from sorteio.models import *
 
 
+class Home(ListView):
+    model = Sorteio
+
+
 class ComarcaList(ListView):
     model = Comarca
 

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sorteio</title>
+</head>
+<body>
+    {% for datas in sorteio_list %}
+        {{ datas }}
+    {% empty %}
+        {{ datas.sortear }}
+    {% endfor %}
+</body>
+</html>
