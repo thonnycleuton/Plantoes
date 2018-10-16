@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sorteio</title>
+    </head>
+    <body>
+        {% for datas in sorteio_list %}
+            {{ datas }}
+        {% empty %}
+            <form action="/" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Sortear" />
+            </form>
+        {% endfor %}
+    </body>
+</html>

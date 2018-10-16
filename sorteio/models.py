@@ -33,6 +33,14 @@ class Defensor(models.Model):
     def __str__(self):
         return self.nome
 
+    def populate(self):
+        import csv
+        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                comarca = Comarca.objects.get(nome=row['comarca'].lower())
+                Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca)
+
 
 class Feriado(models.Model):
     data = models.DateField()
@@ -52,25 +60,3 @@ class Sorteio(models.Model):
 
     def __str__(self):
         return str(self.data)
-
-    def daterange(self, start_date, end_date):
-
-        datas = []
-
-        for n in range(int((end_date - start_date).days)):
-            datas.append(datetime.timedelta(n))
-
-        return datas
-
-    def sortear(self):
-
-        defensores = Defensor.objects.all()
-        dt_inicial = datetime.date(2019, 1, 7)
-        dt_final = datetime.date(2020, 1, 6)
-
-        datas = self.daterange(dt_inicial, dt_final)
-
-        for data in datas:
-            self.objects.create(data=data, defensor=defensores.get(pk=datas.index(data)))
-
-        return self.objects.all()

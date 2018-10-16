@@ -6,9 +6,13 @@
 </head>
 <body>
     {% for datas in sorteio_list %}
-        {{ datas }}
+        {{ datas }} - {{ datas.defensor }}
     {% empty %}
-        {{ datas.sortear }}
+        <form action="/" method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Sortear" />
+        </form>
     {% endfor %}
 </body>
 </html>
