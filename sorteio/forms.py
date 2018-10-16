@@ -10,7 +10,7 @@ class SorteioForm(forms.Form):
 
     def sortear(self):
 
-        defensores = Defensor.objects.all()
+        defensores = Defensor.objects.all().order_by('?')
         # TODO: datas poderiam ser parametros de funcao
         dt_inicial = datetime.date(2019, 1, 7)
         dt_final = datetime.date(2020, 1, 6)
@@ -19,5 +19,5 @@ class SorteioForm(forms.Form):
 
         count = 1
         for data in datas:
-            Sorteio.objects.create(data=data, defensor=defensores.get(pk=count))
+            Sorteio.objects.create(data=data, defensor=defensores[count])
             count = count + 1 if count < len(defensores) else 1
