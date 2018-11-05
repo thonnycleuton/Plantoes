@@ -21,15 +21,11 @@ class SorteioForm(forms.Form):
         for data in datas:
 
             while not Sorteio.objects.filter(data=data).first():
-                # defensor = defensores_licensa[0] if defensores_licensa[0] else defensores[count]
-                if defensores_licensa:
-                    defensor = defensores_licensa[0]
-                    del defensores_licensa[0]
-                else:
-                    defensor = defensores[count]
-                    count = count + 1 if count < len(defensores) - 1 else 0
+
+                defensor = defensores[count]
 
                 if not defensor.afastamento_inicial <= data <= defensor.afastamento_final:
                     Sorteio.objects.create(data=data, defensor=defensor)
                 else:
                     defensores_licensa.append(defensor)
+                count = count + 1 if count < len(defensores) - 1 else 0
