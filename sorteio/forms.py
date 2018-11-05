@@ -28,4 +28,6 @@ class SorteioForm(forms.Form):
                     Sorteio.objects.create(data=data, defensor=defensor)
                 else:
                     defensores_licensa.append(defensor)
+                    data_realocamento = defensor.afastamento_final + datetime.timedelta(days=2)
+                    Sorteio.objects.create(data=data_realocamento, defensor=defensor)
                 count = count + 1 if count < len(defensores) - 1 else 0
