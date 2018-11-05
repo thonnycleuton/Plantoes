@@ -10,7 +10,11 @@ from sorteio.forms import SorteioForm
 from sorteio.models import *
 
 
-class Home(FormView):
+class Home(ListView):
+    model = Sorteio
+
+
+class SorteioFormView(FormView):
     form_class = SorteioForm
     template_name = 'sorteio/sorteio_list.html'
     success_url = '/'

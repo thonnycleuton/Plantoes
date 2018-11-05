@@ -26,12 +26,18 @@ class Comarca(models.Model):
 
 
 class Defensor(models.Model):
+
     nome = models.CharField(max_length=100)
     comarca = models.ForeignKey(Comarca)
     setor = models.CharField(max_length=20)
+    afastamento_inicial = models.DateField()
+    afastamento_final = models.DateField()
 
     def __str__(self):
         return self.nome
+
+    def quant_atuacao(self):
+        return Sorteio.objects.filter(defensor=self).count()
 
     def populate(self):
         import csv
@@ -43,6 +49,7 @@ class Defensor(models.Model):
 
 
 class Feriado(models.Model):
+
     data = models.DateField()
     nome = models.CharField(max_length=100)
     tipo = models.CharField(max_length=30)
