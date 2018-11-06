@@ -12,6 +12,7 @@ from sorteio.models import *
 
 class Home(ListView):
     model = Sorteio
+    ordering = 'data'
 
 
 class SorteioFormView(FormView):

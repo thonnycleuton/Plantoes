@@ -59,6 +59,14 @@ class Feriado(models.Model):
     def __str__(self):
         return self.nome
 
+    def populate(self):
+        import urllib.request, json
+        with urllib.request.urlopen("https://api.calendario.com.br/?json=true&ano=2019&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
+            hollidays = json.loads(url.read().decode())
+        for holliday in hollidays:
+            comarca = Comarca.objects.get(cod_ibge=holliday['2211001'])
+            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'], descricao=holliday['description'], comarca=comarca)
+
 
 class Sorteio(models.Model):
 
@@ -67,3 +75,15 @@ class Sorteio(models.Model):
 
     def __str__(self):
         return str(self.data)
+
+    
+
+
+class Afastamento(models.Model):
+
+    data_inicial = models.DateField()
+    data_final = models.DateField()
+    defensor = models.ForeignKey(Defensor)
+
+    def __str__(self):
+        return str(self.defensor)

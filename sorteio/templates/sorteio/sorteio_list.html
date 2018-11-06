@@ -6,7 +6,7 @@
 </head>
 <body>
     {% for datas in sorteio_list %}
-        {{ forloop.counter }} - {{ datas }} - {{ datas.defensor }} - {{ datas.defensor.quant_atuacao }} - {{ datas.defensor.afastamento_inicial }}
+        {{ forloop.counter }} - {{ datas }} - {{ datas.defensor }}
     {% empty %}
         <form action="/sorteio" method="POST">
             {% csrf_token %}
