@@ -20,7 +20,11 @@ class SorteioFormView(FormView):
     success_url = '/'
 
     def form_valid(self, form):
+
         form.sortear()
+        while not form.verificar_inconsistencia():
+            form.sortear()
+
         return super().form_valid(form)
 
 

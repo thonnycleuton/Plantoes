@@ -7,8 +7,22 @@ from sorteio.models import Defensor, Sorteio
 
 class SorteioForm(forms.Form):
 
+    def verificar_inconsistencia(self):
+
+        sorteados = Sorteio.objects.all()
+        count = 0
+        verificador = True
+
+        for plantao in range(sorteados.__len__() - 1):
+            if sorteados[count] == sorteados[count + 1]:
+                verificador = False
+                print(plantao)
+                Sorteio.objects.all().delete()
+            count += 1
+
+        return verificador
+
     def sortear(self):
-        # TODO: Testar se ha defensores com datas vizinhas
 
         defensores = Defensor.objects.all().order_by('?')
         dt_inicial = datetime.date(2019, 1, 7)
