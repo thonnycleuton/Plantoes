@@ -46,7 +46,7 @@ class Defensor(models.Model):
                 for i in range(3):
                     if row['Afastamento Inicial %s' % str(i + 1)]:
                         Afastamento.objects.get_or_create(data_inicial=row['Afastamento Inicial %s' % str(i + 1)],
-                                                          data_final=row['Afastamento Inicial %s' % str(i + 1)],
+                                                          data_final=row['Afastamento Final %s' % str(i + 1)],
                                                           defensor_id=defensor[0].id)
 
 
