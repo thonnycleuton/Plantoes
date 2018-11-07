@@ -33,6 +33,11 @@ class SorteioForm(forms.Form):
         # cria uma lista de dias de fins de semana em um dado periodo
         weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
         recesso = rrule(DAILY, dtstart=datetime.date(2019, 12, 20), until=datetime.date(2020, 1, 6))
+        # lista de feriadoes especiais que geram impedimentos
+        feriadao = []
+        for dia_feriado in feriados:
+            if 'Carnaval' in dia_feriado.nome or 'Sexta-Feira Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
+                feriadao.append(dia_feriado)
 
         # converte tipo RRULE para Date
         workdays = [dia.date() for dia in workdays]
@@ -83,6 +88,7 @@ class SorteioForm(forms.Form):
             while not Sorteio.objects.filter(data=day).first():
 
                 defensor = defensores[count]
+
                 afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
                 if afastamentos:
@@ -104,7 +110,7 @@ class SorteioForm(forms.Form):
                 count = count + 1 if count < len(defensores) - 1 else 0
 
         # laço para geração de sorteio para dias de recesso de fim de ano
-        defensores = Defensor.objects.all().order_by('?')
+        defensores = Defensor.objects.exclude(recesso=True).order_by('?')
         count = 0
         for day in recesso:
 

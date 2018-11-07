@@ -29,6 +29,7 @@ class Defensor(models.Model):
     nome = models.CharField(max_length=100)
     comarca = models.ForeignKey(Comarca)
     setor = models.CharField(max_length=20)
+    recesso = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nome
@@ -43,7 +44,7 @@ class Defensor(models.Model):
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
                 defensor = Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca)
-                for i in range(3):
+                for i in range(4):
                     if row['Afastamento Inicial %s' % str(i + 1)]:
                         Afastamento.objects.get_or_create(data_inicial=row['Afastamento Inicial %s' % str(i + 1)],
                                                           data_final=row['Afastamento Final %s' % str(i + 1)],
@@ -56,9 +57,10 @@ class Feriado(models.Model):
     tipo = models.CharField(max_length=30)
     descricao = models.CharField(max_length=100)
     comarca = models.ForeignKey(Comarca)
+    impedidos = models.CharField(max_length=300)
 
     def __str__(self):
-        return self.nome
+        return self.nome + str(self.data)
 
     def populate(self):
         import urllib.request, json
