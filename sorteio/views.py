@@ -23,8 +23,7 @@ class SorteioFormView(FormView):
     def form_valid(self, form):
 
         form.sortear()
-        while not form.verificar_inconsistencia():
-            form.sortear()
+        form.verificar_inconsistencia()
 
         return super().form_valid(form)
 

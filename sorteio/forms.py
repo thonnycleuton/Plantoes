@@ -9,15 +9,14 @@ class SorteioForm(forms.Form):
 
     def verificar_inconsistencia(self):
 
-        sorteados = Sorteio.objects.all()
+        sorteados = Sorteio.objects.all().order_by('data')
         count = 0
         verificador = True
 
         for plantao in range(sorteados.__len__() - 1):
-            if sorteados[count] == sorteados[count + 1]:
+            if sorteados[count].defensor == sorteados[count + 1].defensor:
                 verificador = False
-                print('Plantao bugado', sorteados[count].defensor)
-                Sorteio.objects.all().delete()
+                print('Inconsistencias', sorteados[count].defensor)
             count += 1
 
         return verificador
@@ -69,14 +68,17 @@ class SorteioForm(forms.Form):
                         if not afastamento.data_inicial <= day <= afastamento.data_final:
                             if not Sorteio.objects.filter(data=day).first():
                                 Sorteio.objects.create(data=day, defensor=defensor)
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                         else:
                             data_realocamento = self.get_next_day(workdays, afastamento.data_final)
                             try:
                                 Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                             except Exception as e:
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -98,14 +100,17 @@ class SorteioForm(forms.Form):
                         if not afastamento.data_inicial <= day <= afastamento.data_final:
                             if not Sorteio.objects.filter(data=day).first():
                                 Sorteio.objects.create(data=day, defensor=defensor)
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                         else:
                             data_realocamento = self.get_next_day(weekends, afastamento.data_final)
                             try:
                                 Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                             except Exception as e:
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -134,6 +139,7 @@ class SorteioForm(forms.Form):
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                 count = count + 1 if count < len(defensores) - 1 else 0
 
     # Pega o proximo dia disponivel em uma dada lista

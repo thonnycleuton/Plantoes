@@ -43,7 +43,7 @@ class Defensor(models.Model):
             reader = csv.DictReader(csvfile)
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
-                defensor = Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca)
+                defensor = Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca, recesso=row['Recesso'])
                 for i in range(4):
                     if row['Afastamento Inicial %s' % str(i + 1)]:
                         Afastamento.objects.get_or_create(data_inicial=row['Afastamento Inicial %s' % str(i + 1)],
