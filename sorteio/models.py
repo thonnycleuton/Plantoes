@@ -26,12 +26,9 @@ class Comarca(models.Model):
 
 
 class Defensor(models.Model):
-
     nome = models.CharField(max_length=100)
     comarca = models.ForeignKey(Comarca)
     setor = models.CharField(max_length=20)
-    afastamento_inicial = models.DateField()
-    afastamento_final = models.DateField()
 
     def __str__(self):
         return self.nome
@@ -45,11 +42,15 @@ class Defensor(models.Model):
             reader = csv.DictReader(csvfile)
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
-                Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca)
+                defensor = Defensor.objects.get_or_create(nome=row['nome'], setor=row['setor'], comarca=comarca)
+                for i in range(3):
+                    if row['Afastamento Inicial %s' % str(i + 1)]:
+                        Afastamento.objects.get_or_create(data_inicial=row['Afastamento Inicial %s' % str(i + 1)],
+                                                          data_final=row['Afastamento Inicial %s' % str(i + 1)],
+                                                          defensor_id=defensor[0].id)
 
 
 class Feriado(models.Model):
-
     data = models.DateField()
     nome = models.CharField(max_length=100)
     tipo = models.CharField(max_length=30)
@@ -61,26 +62,24 @@ class Feriado(models.Model):
 
     def populate(self):
         import urllib.request, json
-        with urllib.request.urlopen("https://api.calendario.com.br/?json=true&ano=2019&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
+        with urllib.request.urlopen(
+                "https://api.calendario.com.br/?json=true&ano=2019&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
             hollidays = json.loads(url.read().decode())
         for holliday in hollidays:
             comarca = Comarca.objects.get(cod_ibge=holliday['2211001'])
-            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'], descricao=holliday['description'], comarca=comarca)
+            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'],
+                                   descricao=holliday['description'], comarca=comarca)
 
 
 class Sorteio(models.Model):
-
     data = models.DateField()
     defensor = models.ForeignKey(Defensor)
 
     def __str__(self):
         return str(self.data)
 
-    
-
 
 class Afastamento(models.Model):
-
     data_inicial = models.DateField()
     data_final = models.DateField()
     defensor = models.ForeignKey(Defensor)

@@ -37,6 +37,7 @@ class SorteioForm(forms.Form):
         # converte tipo RRULE para Date
         workdays = [dia.date() for dia in workdays]
         weekends = [dia.date() for dia in weekends]
+        recesso = [dia.date() for dia in recesso]
 
         # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
         for feriado in feriados:
@@ -78,6 +79,25 @@ class SorteioForm(forms.Form):
                 else:
                     # escolhe uma data de realocação
                     data_realocamento = self.get_next_day(weekends, day)
+                    Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                count = count + 1 if count < len(defensores) - 1 else 0
+
+        # laço para geração de sorteio para dias de recesso de fim de ano
+        defensores = Defensor.objects.all().order_by('?')
+        count = 0
+        for day in recesso:
+
+            while not Sorteio.objects.filter(data=day).first():
+
+                defensor = defensores[count]
+
+                # se o defensor não estiver de ferias na data do laço o sorteio é realizado
+                if not defensor.afastamento_inicial <= day <= defensor.afastamento_final:
+                    Sorteio.objects.create(data=day, defensor=defensor)
+                # caso contrário, ele é realocado para o primeiro dia após seu retorno
+                else:
+                    # escolhe uma data de realocação
+                    data_realocamento = self.get_next_day(recesso, day)
                     Sorteio.objects.create(data=data_realocamento, defensor=defensor)
                 count = count + 1 if count < len(defensores) - 1 else 0
 
