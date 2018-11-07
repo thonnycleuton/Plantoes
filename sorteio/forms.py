@@ -2,7 +2,7 @@ import datetime
 
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
 from django.forms import forms
-from sorteio.models import Defensor, Sorteio, Feriado
+from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
@@ -55,12 +55,15 @@ class SorteioForm(forms.Form):
             while not Sorteio.objects.filter(data=day).first():
 
                 defensor = defensores[count]
+                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
-                if not defensor.afastamento_inicial <= day <= defensor.afastamento_final:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-                else:
-                    data_realocamento = self.get_next_day(workdays, day)
-                    Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                for afastamento in afastamentos:
+
+                    if not afastamento.data_inicial <= day <= afastamento.data_final:
+                        Sorteio.objects.create(data=day, defensor=defensor)
+                    else:
+                        data_realocamento = self.get_next_day(workdays, day)
+                        Sorteio.objects.create(data=data_realocamento, defensor=defensor)
                 count = count + 1 if count < len(defensores) - 1 else 0
 
         # laço para geração de sorteio para dias de fim de semana
@@ -71,15 +74,18 @@ class SorteioForm(forms.Form):
             while not Sorteio.objects.filter(data=day).first():
 
                 defensor = defensores[count]
+                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
-                # se o defensor não estiver de ferias na data do laço o sorteio é realizado
-                if not defensor.afastamento_inicial <= day <= defensor.afastamento_final:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-                # caso contrário, ele é realocado para o primeiro dia após seu retorno
-                else:
-                    # escolhe uma data de realocação
-                    data_realocamento = self.get_next_day(weekends, day)
-                    Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                for afastamento in afastamentos:
+
+                    # se o defensor não estiver de ferias na data do laço o sorteio é realizado
+                    if not afastamento.data_inicial <= day <= afastamento.data_final:
+                        Sorteio.objects.create(data=day, defensor=defensor)
+                    # caso contrário, ele é realocado para o primeiro dia após seu retorno
+                    else:
+                        # escolhe uma data de realocação
+                        data_realocamento = self.get_next_day(weekends, day)
+                        Sorteio.objects.create(data=data_realocamento, defensor=defensor)
                 count = count + 1 if count < len(defensores) - 1 else 0
 
         # laço para geração de sorteio para dias de recesso de fim de ano
@@ -90,21 +96,25 @@ class SorteioForm(forms.Form):
             while not Sorteio.objects.filter(data=day).first():
 
                 defensor = defensores[count]
+                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
-                # se o defensor não estiver de ferias na data do laço o sorteio é realizado
-                if not defensor.afastamento_inicial <= day <= defensor.afastamento_final:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-                # caso contrário, ele é realocado para o primeiro dia após seu retorno
-                else:
-                    # escolhe uma data de realocação
-                    data_realocamento = self.get_next_day(recesso, day)
-                    Sorteio.objects.create(data=data_realocamento, defensor=defensor)
+                for afastamento in afastamentos:
+
+                    # se o defensor não estiver de ferias na data do laço o sorteio é realizado
+                    if not afastamento.data_inicial <= day <= afastamento.data_final:
+                        Sorteio.objects.create(data=day, defensor=defensor)
+                    # caso contrário, ele é realocado para o primeiro dia após seu retorno
+                    else:
+                        # escolhe uma data de realocação
+                        data_realocamento = self.get_next_day(recesso, day)
+                        Sorteio.objects.create(data=data_realocamento, defensor=defensor)
                 count = count + 1 if count < len(defensores) - 1 else 0
 
     # Pega o proximo dia disponivel em uma dada lista
     @staticmethod
     def get_next_day(lista, dia):
         """Metodo para buscar a próxima data disponível em uma dada lista"""
+        # TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
         for l in lista:
             if l >= dia + datetime.timedelta(days=1):
                 return l
