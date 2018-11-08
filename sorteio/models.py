@@ -39,7 +39,7 @@ class Defensor(models.Model):
 
     def populate(self):
         import csv
-        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
+        with open('/Users/tonynascimento/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
@@ -87,4 +87,4 @@ class Afastamento(models.Model):
     defensor = models.ForeignKey(Defensor)
 
     def __str__(self):
-        return str(self.defensor)
+        return str(self.defensor.nome + ' - ' + str(self.data_final))

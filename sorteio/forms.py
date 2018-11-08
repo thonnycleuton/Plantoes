@@ -7,6 +7,16 @@ from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 class SorteioForm(forms.Form):
 
+    dt_inicial = datetime.date(2019, 1, 7)
+    dt_final = datetime.date(2019, 12, 19)
+    feriados = Feriado.objects.all()
+
+    # cria uma lista de dias úteis em um dado periodo
+    workdays = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(MO, TU, WE, TH, FR))
+    # cria uma lista de dias de fins de semana em um dado periodo
+    weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
+    recesso = rrule(DAILY, dtstart=datetime.date(2019, 12, 20), until=datetime.date(2020, 1, 6))
+
     def verificar_inconsistencia(self):
 
         sorteados = Sorteio.objects.all().order_by('data')
@@ -16,35 +26,25 @@ class SorteioForm(forms.Form):
         for plantao in range(sorteados.__len__() - 1):
             if sorteados[count].defensor == sorteados[count + 1].defensor:
                 verificador = False
-                print('Inconsistencias', sorteados[count].defensor)
+                print('Inconsistencias', sorteados[count].data, ' - ',sorteados[count].id)
             count += 1
 
         return verificador
 
     def sortear(self):
-
-        dt_inicial = datetime.date(2019, 1, 7)
-        dt_final = datetime.date(2019, 12, 19)
-        feriados = Feriado.objects.all()
-
-        # cria uma lista de dias úteis em um dado periodo
-        workdays = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(MO, TU, WE, TH, FR))
-        # cria uma lista de dias de fins de semana em um dado periodo
-        weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
-        recesso = rrule(DAILY, dtstart=datetime.date(2019, 12, 20), until=datetime.date(2020, 1, 6))
         # lista de feriadoes especiais que geram impedimentos
         feriadao = []
-        for dia_feriado in feriados:
+        for dia_feriado in self.feriados:
             if 'Carnaval' in dia_feriado.nome or 'Sexta-Feira Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
                 feriadao.append(dia_feriado)
 
         # converte tipo RRULE para Date
-        workdays = [dia.date() for dia in workdays]
-        weekends = [dia.date() for dia in weekends]
-        recesso = [dia.date() for dia in recesso]
+        workdays = [dia.date() for dia in self.workdays]
+        weekends = [dia.date() for dia in self.weekends]
+        recesso = [dia.date() for dia in self.recesso]
 
         # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
-        for feriado in feriados:
+        for feriado in self.feriados:
             if feriado.data in workdays:
                 del workdays[workdays.index(feriado.data)]
             if feriado.data not in weekends:
@@ -62,23 +62,17 @@ class SorteioForm(forms.Form):
                 afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
                 if afastamentos:
+                    impedimento = False
 
                     for afastamento in afastamentos:
 
-                        if not afastamento.data_inicial <= day <= afastamento.data_final:
-                            if not Sorteio.objects.filter(data=day).first():
-                                Sorteio.objects.create(data=day, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
-                        else:
-                            data_realocamento = self.get_next_day(workdays, afastamento.data_final)
-                            try:
-                                Sorteio.objects.create(data=data_realocamento, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
-                            except Exception as e:
-                                print(e, day, afastamento.data_final)
+                        if afastamento.data_inicial <= day <= afastamento.data_final:
+                            impedimento = True
+
+                    if not impedimento:
+                        Sorteio.objects.create(data=day, defensor=defensor)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -94,23 +88,17 @@ class SorteioForm(forms.Form):
                 afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
                 if afastamentos:
+                    impedimento = False
 
                     for afastamento in afastamentos:
 
-                        if not afastamento.data_inicial <= day <= afastamento.data_final:
-                            if not Sorteio.objects.filter(data=day).first():
-                                Sorteio.objects.create(data=day, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
-                        else:
-                            data_realocamento = self.get_next_day(weekends, afastamento.data_final)
-                            try:
-                                Sorteio.objects.create(data=data_realocamento, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
-                            except Exception as e:
-                                print(e, day, afastamento.data_final)
+                        if afastamento.data_inicial <= day <= afastamento.data_final:
+                            impedimento = True
+
+                    if not impedimento:
+                        Sorteio.objects.create(data=day, defensor=defensor)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -139,7 +127,6 @@ class SorteioForm(forms.Form):
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
                 count = count + 1 if count < len(defensores) - 1 else 0
 
     # Pega o proximo dia disponivel em uma dada lista
