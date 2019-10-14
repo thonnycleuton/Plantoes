@@ -82,9 +82,10 @@ class Sorteio(models.Model):
 
 
 class Afastamento(models.Model):
+
     data_inicial = models.DateField()
     data_final = models.DateField()
-    defensor = models.ForeignKey(Defensor)
+    defensor = models.ForeignKey(Defensor, related_name='afastamentos')
 
     def __str__(self):
-        return str(self.defensor)
+        return str(self.data_inicial) + ' a ' + str(self.data_final)

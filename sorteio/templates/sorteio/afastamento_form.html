@@ -45,29 +45,54 @@
               <div class="clearfix"></div>
             </div>
             <div class="x_content">
-{#              <p class="text-muted font-13 m-b-30">#}
-{#                This example shows FixedHeader being styling by the Bootstrap CSS framework.#}
-{#              </p>#}
-{#              <table id="datatable-buttons" class="table table-striped table-bordered">#}
-              <table id="datatable-fixed-header" class="table table-striped table-bordered">
-                  <tbody>
-                  {% for defensor in defensor_list %}
-                      <tr>
-                          <td><a href="{% url 'sorteio:defensor_detail' defensor.pk %}">{{ forloop.counter }}</a></td>
-                          <td>{{ defensor.nome }}</td>
-                          <td>{{ defensor.comarca|capfirst }}</td>
-                      </tr>
-                  {% empty %}
-                  {% endfor %}
-                  </tbody>
-                <thead>
-                      <tr>
-                          <th>Ordem</th>
-                          <th>Defensor(a)</th>
-                          <th>Comarca</th>
-                      </tr>
-                </thead>
-              </table>
+                <form class="form-horizontal" method="post" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">{{ form.data_inicial.label_tag }}</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><span class="fa fa-pencil"></span></span>
+                                                {{ form.data_inicial}}
+                                            </div>
+                                            <span class="help-block">Nome do Servico</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">{{ form.data_final.label_tag }}</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><span class="fa fa-book"></span></span>
+                                                {{ form.data_final }}
+                                            </div>
+                                            <span class="help-block">This is sample of text field</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">{{ form.defensor.label_tag }}</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><span class="fa fa-book"></span></span>
+                                                {{ form.defensor }}
+                                            </div>
+                                            <span class="help-block">This is sample of text field</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn btn-default">Limpar Campos</button>
+                            <button class="btn btn-primary pull-right" type="submit">Salvar</button>
+                        </div>
+                    </div>
+                </form>
             </div>
           </div>
         </div>

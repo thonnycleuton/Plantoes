@@ -1,7 +1,7 @@
 import datetime
 
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
-from django.forms import forms
+from django import forms
 from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
@@ -46,7 +46,7 @@ class SorteioForm(forms.Form):
         # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
         for feriado in feriados:
             if feriado.data in workdays:
-                del workdays[workdays.index(feriado.data)]
+                del workdays[workdays.index(feriado.data)],
             if feriado.data not in weekends:
                 weekends.append(feriado.data)
         # ordena a lista de fins de semanas e feriados
@@ -68,17 +68,20 @@ class SorteioForm(forms.Form):
                         if not afastamento.data_inicial <= day <= afastamento.data_final:
                             if not Sorteio.objects.filter(data=day).first():
                                 Sorteio.objects.create(data=day, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                                           data_final=day + datetime.timedelta(days=1))
                         else:
                             data_realocamento = self.get_next_day(workdays, afastamento.data_final)
                             try:
                                 Sorteio.objects.create(data=data_realocamento, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                                           data_final=day + datetime.timedelta(days=1))
                             except Exception as e:
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                               data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -100,17 +103,20 @@ class SorteioForm(forms.Form):
                         if not afastamento.data_inicial <= day <= afastamento.data_final:
                             if not Sorteio.objects.filter(data=day).first():
                                 Sorteio.objects.create(data=day, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                                           data_final=day + datetime.timedelta(days=1))
                         else:
                             data_realocamento = self.get_next_day(weekends, afastamento.data_final)
                             try:
                                 Sorteio.objects.create(data=data_realocamento, defensor=defensor)
-                                Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                                Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                                           data_final=day + datetime.timedelta(days=1))
                             except Exception as e:
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                               data_final=day + datetime.timedelta(days=1))
 
                 count = count + 1 if count < len(defensores) - 1 else 0
 
@@ -139,15 +145,28 @@ class SorteioForm(forms.Form):
                                 print(e, day, afastamento.data_final)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
-                    Afastamento.objects.create(defensor=defensor, data_inicial=day, data_final=day + datetime.timedelta(days=1))
+                    Afastamento.objects.create(defensor=defensor, data_inicial=day,
+                                               data_final=day + datetime.timedelta(days=1))
                 count = count + 1 if count < len(defensores) - 1 else 0
 
     # Pega o proximo dia disponivel em uma dada lista
     @staticmethod
     def get_next_day(lista, dia):
         """Metodo para buscar a próxima data disponível em uma dada lista"""
-        #TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
+        # TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
         for l in lista:
             if l >= dia + datetime.timedelta(days=1):
                 if not Sorteio.objects.filter(data=l).first():
                     return l
+
+
+class AfastamentoForm(forms.ModelForm):
+
+    class Meta:
+        model = Afastamento
+        fields = '__all__'
+        widgets = {
+            'data_inicial': forms.DateInput(attrs={'data-date-format': 'dd-mm-yyyy', 'class': 'form-control'}),
+            'data_final': forms.DateInput(attrs={'data-date-format': 'dd-mm-yyyy', 'class': 'form-control'}),
+            'defensor': forms.Select(attrs={'class': 'form-control'}),
+        }

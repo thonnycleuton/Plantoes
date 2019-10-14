@@ -1,0 +1,4 @@
+{{ defensor }}
+{% for afastamento in defensor.afastamentos.all %}
+    {{ forloop.counter }} - {{ afastamento }}
+{% endfor %}
