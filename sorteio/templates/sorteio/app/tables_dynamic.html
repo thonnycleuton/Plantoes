@@ -1,4 +1,3 @@
-</html>
 {% extends "sorteio/app/base_site.html" %}
 
 {% block title %} Table Dynamic {% endblock title %}
@@ -17,7 +16,7 @@
     <div class="">
       <div class="page-title">
         <div class="title_left">
-          <h3>2020 <small>07/01/2020 - 06/01/2021</small></h3>
+          <h3>2019 <small>07/01/2019 - 06/01/2020</small></h3>
         </div>
       </div>
 
@@ -27,33 +26,52 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
           <div class="x_panel">
             <div class="x_title">
-              <h2> {{ defensor }} <small>Afastamentos</small></h2>
+              <h2>Sorteio <small>Resultado</small></h2>
+              <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                  </ul>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+              </ul>
               <div class="clearfix"></div>
             </div>
             <div class="x_content">
-              <p class="text-muted font-13 m-b-30">
-              </p>
-                {% for datas in sorteio_list %}
-                    <table id="datatable-buttons" class="table table-striped table-bordered">
-                      <table id="datatable-fixed-header" class="table table-striped table-bordered">
-                      <tbody>
-                        {{ forloop.counter }} - {{ datas }} - {{ datas.defensor }} - {{ datas.defensor.quant_atuacao }}
-                    {% empty %}
-                        <form action="/sorteio" method="POST">
-                            {% csrf_token %}
-                            {{ form.as_p }}
-                            <input type="submit" value="Sortear" />
-                        </form>
-                      </tbody>
-                      <thead>
-                        <tr>
-                            <th>Ordem</th>
-                            <th>Data inicio</th>
-                            <th>Data Fim</th>
-                        </tr>
-                      </thead>
-                  </table>
-                {% endfor %}
+{#              <p class="text-muted font-13 m-b-30">#}
+{#                This example shows FixedHeader being styling by the Bootstrap CSS framework.#}
+{#              </p>#}
+{#              <table id="datatable-buttons" class="table table-striped table-bordered">#}
+              <table id="datatable-fixed-header" class="table table-striped table-bordered">
+                  <tbody>
+                  {% for datas in sorteio_list %}
+                      <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ datas.defensor }}</td>
+                          <td>{{ datas.data|date:"d M" }}</td>
+                          <td>{{ datas.data|date:"l" }}</td>
+                          <td>{{ datas.defensor.quant_atuacao }}</td>
+                      </tr>
+                  {% empty %}
+                  {% endfor %}
+                  </tbody>
+                <thead>
+                      <tr>
+                          <th>Ordem</th>
+                          <th>Defensor(a)</th>
+                          <th>Data</th>
+                          <th>Dia da Semana</th>
+                          <th>Atuacoes</th>
+                      </tr>
+                </thead>
+              </table>
             </div>
           </div>
         </div>

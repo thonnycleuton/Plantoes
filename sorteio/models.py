@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
-
 from django.db import models
 
 
@@ -39,7 +37,7 @@ class Defensor(models.Model):
 
     def populate(self):
         import csv
-        with open('/Users/tonynascimento/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
+        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
@@ -65,12 +63,11 @@ class Feriado(models.Model):
     def populate(self):
         import urllib.request, json
         with urllib.request.urlopen(
-                "https://api.calendario.com.br/?json=true&ano=2019&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
+                "https://api.calendario.com.br/?json=true&ano=2020&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
             hollidays = json.loads(url.read().decode())
         for holliday in hollidays:
             comarca = Comarca.objects.get(cod_ibge=holliday['2211001'])
-            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'],
-                                   descricao=holliday['description'], comarca=comarca)
+            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'], descricao=holliday['description'], comarca=comarca)
 
 
 class Sorteio(models.Model):
@@ -82,9 +79,10 @@ class Sorteio(models.Model):
 
 
 class Afastamento(models.Model):
+
     data_inicial = models.DateField()
     data_final = models.DateField()
-    defensor = models.ForeignKey(Defensor)
+    defensor = models.ForeignKey(Defensor, related_name='afastamentos')
 
     def __str__(self):
-        return str(self.defensor.nome + ' - ' + str(self.data_final))
+        return str(self.data_inicial) + ' a ' + str(self.data_final)
