@@ -111,7 +111,7 @@ TIME_ZONE = 'America/Fortaleza'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -120,3 +120,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+DATE_INPUT_FORMATS = ['%d/%m/%Y']

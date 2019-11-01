@@ -23,15 +23,15 @@ class SorteioForm(forms.Form):
 
     def sortear(self):
 
-        dt_inicial = datetime.date(2019, 1, 7)
-        dt_final = datetime.date(2019, 12, 19)
+        dt_inicial = datetime.date(2020, 1, 7)
+        dt_final = datetime.date(2020, 12, 19)
         feriados = Feriado.objects.all()
 
         # cria uma lista de dias úteis em um dado periodo
         workdays = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(MO, TU, WE, TH, FR))
         # cria uma lista de dias de fins de semana em um dado periodo
         weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
-        recesso = rrule(DAILY, dtstart=datetime.date(2019, 12, 20), until=datetime.date(2020, 1, 6))
+        recesso = rrule(DAILY, dtstart=datetime.date(2020, 12, 20), until=datetime.date(2021, 1, 6))
         # lista de feriadoes especiais que geram impedimentos
         feriadao = []
         for dia_feriado in feriados:
@@ -51,6 +51,7 @@ class SorteioForm(forms.Form):
                 weekends.append(feriado.data)
         # ordena a lista de fins de semanas e feriados
         weekends = sorted(weekends)
+
         # laço para geração de sorteio para dias úteis da semana
         defensores = Defensor.objects.all().order_by('?')
         count = 0
@@ -83,7 +84,12 @@ class SorteioForm(forms.Form):
                     Afastamento.objects.create(defensor=defensor, data_inicial=day,
                                                data_final=day + datetime.timedelta(days=1))
 
-                count = count + 1 if count < len(defensores) - 1 else 0
+                # count = count + 1 if count < len(defensores) - 1 else 0
+                if count < len(defensores) - 1:
+                    count += 1
+                else:
+                    count = 0
+                    defensores = Defensor.objects.all().order_by('?')
 
         # laço para geração de sorteio para dias de fim de semana
         defensores = Defensor.objects.all().order_by('?')
@@ -118,7 +124,12 @@ class SorteioForm(forms.Form):
                     Afastamento.objects.create(defensor=defensor, data_inicial=day,
                                                data_final=day + datetime.timedelta(days=1))
 
-                count = count + 1 if count < len(defensores) - 1 else 0
+                # count = count + 1 if count < len(defensores) - 1 else 0
+                if count < len(defensores) - 1:
+                    count += 1
+                else:
+                    count = 0
+                    defensores = Defensor.objects.all().order_by('?')
 
         # laço para geração de sorteio para dias de recesso de fim de ano
         defensores = Defensor.objects.exclude(recesso=True).order_by('?')
@@ -147,7 +158,13 @@ class SorteioForm(forms.Form):
                     Sorteio.objects.create(data=day, defensor=defensor)
                     Afastamento.objects.create(defensor=defensor, data_inicial=day,
                                                data_final=day + datetime.timedelta(days=1))
-                count = count + 1 if count < len(defensores) - 1 else 0
+
+                # count = count + 1 if count < len(defensores) - 1 else 0
+                if count < len(defensores) - 1:
+                    count += 1
+                else:
+                    count = 0
+                    defensores = Defensor.objects.all().order_by('?')
 
     # Pega o proximo dia disponivel em uma dada lista
     @staticmethod
@@ -166,7 +183,7 @@ class AfastamentoForm(forms.ModelForm):
         model = Afastamento
         fields = '__all__'
         widgets = {
-            'data_inicial': forms.DateInput(attrs={'data-date-format': 'dd-mm-yyyy', 'class': 'form-control'}),
-            'data_final': forms.DateInput(attrs={'data-date-format': 'dd-mm-yyyy', 'class': 'form-control'}),
+            'data_inicial': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
+            'data_final': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
             'defensor': forms.Select(attrs={'class': 'form-control'}),
         }

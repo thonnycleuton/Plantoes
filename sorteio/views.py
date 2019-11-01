@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 # Create your views here.
+from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView, DetailView, CreateView
 
 from sorteio.forms import SorteioForm, AfastamentoForm
@@ -50,8 +51,8 @@ class AfastamentoFormView(FormView):
     form_class = AfastamentoForm
     context_object_name = 'afastamentos'
     template_name = 'sorteio/afastamento_form.html'
+    success_url = reverse_lazy('sorteio:defensore_list')
 
     def form_valid(self, form):
-        # override the ModelFormMixin definition so you don't save twice
-        print(form.defensor)
-        return HttpResponseRedirect(self.get_success_url())
+        form.save()
+        return super().form_valid(form)
