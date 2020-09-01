@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView, DetailView, CreateView
 
-from sorteio.forms import SorteioForm, AfastamentoForm
+from sorteio.forms import SorteioForm
 from sorteio.models import *
 
 
