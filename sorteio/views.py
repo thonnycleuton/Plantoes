@@ -25,7 +25,9 @@ class SorteioFormView(FormView):
 
     def form_valid(self, form):
         form.sortear()
-        form.verificar_inconsistencia()
+        while not form.verificar_inconsistencia():
+            Sorteio.objects.all().delete()
+            form.sortear()
 
         return super().form_valid(form)
 
