@@ -122,11 +122,11 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'thonnycleuton@gmail.com'
 EMAIL_HOST_PASSWORD = 'R1cr0nd0p4.'
-EMAIL_PORT = 587
+EMAIL_PORT = 25
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CONTACT_EMAIL = 'thonnycleuton@gmail.com'
 
 # Auth
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'sorteio:home'
 LOGOUT_URL = 'logout'
