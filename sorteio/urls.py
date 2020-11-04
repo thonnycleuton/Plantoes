@@ -13,8 +13,7 @@ urlpatterns = [
     url(r'feriados/', FeriadoList.as_view(), name='feriado_list'),
     url(r'afastamentos/', AfastamentoFormView.as_view(), name='afastamento_create'),
 
-    url(r'^password_change/$', PasswordChangeView.as_view(success_url=reverse_lazy('home'), template_name='registration/password_change.html'), name='password_change'),
-    url(r'^password_reset/$', PasswordResetView.as_view(email_template_name='registration/password_reset_email.html', template_name='registration/password_reset.html', ), name='password_reset'),
+    url(r'^password_reset/$', PasswordResetView.as_view(email_template_name='registration/password_reset_email.html', template_name='registration/password_reset.html'), name='password_reset'),
     url(r'^password_reset/done/$', PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     url(r'^reset/done/$', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
