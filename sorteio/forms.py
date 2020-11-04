@@ -1,12 +1,11 @@
 import datetime
 
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
-from django.forms import forms
+from django import forms
 from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
-
     dt_inicial = datetime.date(2020, 1, 7)
     dt_final = datetime.date(2020, 12, 19)
     feriados = Feriado.objects.all()
@@ -150,8 +149,19 @@ class SorteioForm(forms.Form):
     @staticmethod
     def get_next_day(lista, dia):
         """Metodo para buscar a próxima data disponível em uma dada lista"""
-        #TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
+        # TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
         for l in lista:
             if l >= dia + datetime.timedelta(days=1):
                 if not Sorteio.objects.filter(data=l).first():
                     return l
+
+
+class AfastamentoForm(forms.ModelForm):
+    class Meta:
+        model = Afastamento
+        fields = '__all__'
+        widgets = {
+            'data_inicial': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
+            'data_final': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
+            'defensor': forms.Select(attrs={'class': 'form-control'}),
+        }
