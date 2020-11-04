@@ -1,4 +1,4 @@
-Django==1.11.16
+Django==1.11.29
 python-dateutil==2.7.5
 pytz==2018.5
 six==1.11.0
