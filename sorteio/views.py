@@ -48,6 +48,10 @@ class FeriadoList(ListView):
     model = Feriado
 
 
+class AfastamentoListView(ListView):
+    model = Afastamento
+
+
 class AfastamentoFormView(FormView):
 
     form_class = AfastamentoForm
