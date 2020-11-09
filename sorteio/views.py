@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView, DetailView, CreateView
 
-from sorteio.forms import SorteioForm, AfastamentoForm
+from sorteio.forms import *
 from sorteio.models import *
 
 
@@ -50,6 +50,18 @@ class FeriadoDetail(DetailView):
 
 class FeriadoList(ListView):
     model = Feriado
+    ordering = ['pk']
+
+
+class FeriadoFormView(FormView):
+    form_class = FeriadoForm
+    context_object_name = 'feriados'
+    template_name = 'sorteio/feriado_form.html'
+    success_url = reverse_lazy('sorteio:feriado_list')
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
 
 class AfastamentoListView(ListView):

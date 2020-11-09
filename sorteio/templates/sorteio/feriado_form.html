@@ -45,35 +45,23 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="col-md-3 control-label">{{ form.data_inicial.label_tag }}</label>
+                                        <label class="col-md-3 control-label">{{ form.nome.label_tag }}</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><span class="fa fa-book"></span></span>
+                                                {{ form.nome }}
+                                            </div>
+                                            <span class="help-block">Nome do Feriado</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">{{ form.data.label_tag }}</label>
                                         <div class="col-md-9">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><span class="fa fa-pencil"></span></span>
-                                                {{ form.data_inicial }}
+                                                {{ form.data }}
                                             </div>
-                                            <span class="help-block">Início do período Afastamento</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-md-3 control-label">{{ form.data_final.label_tag }}</label>
-                                        <div class="col-md-9">
-                                            <div class="input-group">
-                                                <span class="input-group-addon"><span class="fa fa-book"></span></span>
-                                                {{ form.data_final }}
-                                            </div>
-                                            <span class="help-block">Fim do período Afastamento</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-md-3 control-label">{{ form.defensor.label_tag }}</label>
-                                        <div class="col-md-9">
-                                            <div class="input-group">
-                                                <span class="input-group-addon"><span class="fa fa-book"></span></span>
-                                                {{ form.defensor }}
-                                            </div>
-                                            <span class="help-block">Nome do Defensor</span>
+                                            <span class="help-block">Dia do Feriado</span>
                                         </div>
                                     </div>
                                 </div>

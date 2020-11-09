@@ -50,23 +50,26 @@ class Defensor(models.Model):
 
 
 class Feriado(models.Model):
+
     data = models.DateField()
     nome = models.CharField(max_length=100)
-    tipo = models.CharField(max_length=30)
-    descricao = models.CharField(max_length=100)
-    comarca = models.ForeignKey(Comarca)
+    # tipo = models.CharField(max_length=30)
+    # descricao = models.CharField(max_length=100)
+    # comarca = models.ForeignKey(Comarca)
     impedidos = models.CharField(max_length=300)
 
     def __str__(self):
         return self.nome + " - " + str(self.data)
 
-    def populate(self):
+    @staticmethod
+    def populate():
         import urllib.request, json
         with urllib.request.urlopen(
-                "https://api.calendario.com.br/?json=true&ano=2020&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
+                "https://api.calendario.com.br/?json=true&ano=2021&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
             hollidays = json.loads(url.read().decode())
+
         for holliday in hollidays:
-            comarca = Comarca.objects.get(cod_ibge=holliday['2211001'])
+            comarca = Comarca.objects.get(pk=440)
             Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'], descricao=holliday['description'], comarca=comarca)
 
 

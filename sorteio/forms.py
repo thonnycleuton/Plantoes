@@ -6,15 +6,18 @@ from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
-    dt_inicial = datetime.date(2020, 1, 7)
-    dt_final = datetime.date(2020, 12, 19)
+
+    dt_inicial = datetime.date(2021, 1, 6)
+    dt_final = datetime.date(2021, 12, 19)
+    recesso_inicial = datetime.date(2021, 12, 20)
+    recesso_final = datetime.date(2022, 1, 6)
     feriados = Feriado.objects.all()
 
     # cria uma lista de dias úteis em um dado periodo
     workdays = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(MO, TU, WE, TH, FR))
     # cria uma lista de dias de fins de semana em um dado periodo
     weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
-    recesso = rrule(DAILY, dtstart=datetime.date(2020, 12, 20), until=datetime.date(2021, 1, 6))
+    recesso = rrule(DAILY, dtstart=recesso_inicial, until=recesso_final)
 
     def verificar_inconsistencia(self):
 
@@ -35,7 +38,7 @@ class SorteioForm(forms.Form):
         Sorteio.objects.all().delete()
         feriadao = []
         for dia_feriado in self.feriados:
-            if 'Carnaval' in dia_feriado.nome or 'Sexta-Feira Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
+            if 'Carnaval' in dia_feriado.nome or 'Semana Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
                 feriadao.append(dia_feriado)
 
         # converte tipo RRULE para Date
@@ -157,6 +160,7 @@ class SorteioForm(forms.Form):
 
 
 class AfastamentoForm(forms.ModelForm):
+
     class Meta:
         model = Afastamento
         fields = '__all__'
@@ -164,4 +168,14 @@ class AfastamentoForm(forms.ModelForm):
             'data_inicial': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
             'data_final': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
             'defensor': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class FeriadoForm(forms.ModelForm):
+
+    class Meta:
+        model = Feriado
+        exclude = ('impedidos', )
+        widgets = {
+            'data': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
         }
