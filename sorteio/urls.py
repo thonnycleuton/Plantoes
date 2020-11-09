@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'feriados/', FeriadoList.as_view(), name='feriado_list'),
     url(r'^feriado_details/(?P<pk>\d+)/$', FeriadoDetail.as_view(), name='feriado_detail'),
     url(r'afastamentos/', AfastamentoFormView.as_view(), name='afastamento_create'),
+    url(r'novo_afastamento/', AfastamentoFormView.as_view(), name='afastamento_create'),
 
     url(r'^password_reset/$', PasswordResetView.as_view(email_template_name='registration/password_reset_email.html', template_name='registration/password_reset.html'), name='password_reset'),
     url(r'^password_reset/done/$', PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
@@ -22,5 +23,3 @@ urlpatterns = [
     url(r'^entrar/$', LoginView.as_view(), name='login'),
     url(r'^sair/$', LogoutView.as_view(), name='logout'),
 ]
-
-

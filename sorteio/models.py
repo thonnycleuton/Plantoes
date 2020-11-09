@@ -84,5 +84,9 @@ class Afastamento(models.Model):
     data_final = models.DateField()
     defensor = models.ForeignKey(Defensor, related_name='afastamentos')
 
+    def quant_afastamentos(self):
+
+        return len(self.defensor.afastamentos.all())
+
     def __str__(self):
         return str(self.data_inicial) + ' a ' + str(self.data_final)
