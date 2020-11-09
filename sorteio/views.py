@@ -44,12 +44,15 @@ class DefensorDetail(DetailView):
     model = Defensor
 
 
+class FeriadoDetail(DetailView):
+    model = Feriado
+
+
 class FeriadoList(ListView):
     model = Feriado
 
 
 class AfastamentoFormView(FormView):
-
     form_class = AfastamentoForm
     context_object_name = 'afastamentos'
     template_name = 'sorteio/afastamento_form.html'

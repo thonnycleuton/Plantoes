@@ -8,7 +8,7 @@
 <table>
     {% for datas in sorteio_list %}
         <tr>
-            <td>{{ forloop.counter }} </td>
+            <td><a href="{% url 'sorteio:defensor_detail' datas.defensor.pk %}">{{ forloop.counter }} </a></td>
             <td>{{ datas.data }} </td>
             <td>{{ datas.defensor }} </td>
         </tr>

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'defensores/', DefensorList.as_view(), name='defensore_list'),
     url(r'^defensor_details/(?P<pk>\d+)/$', DefensorDetail.as_view(), name='defensor_detail'),
     url(r'feriados/', FeriadoList.as_view(), name='feriado_list'),
+    url(r'^feriado_details/(?P<pk>\d+)/$', FeriadoDetail.as_view(), name='feriado_detail'),
     url(r'afastamentos/', AfastamentoFormView.as_view(), name='afastamento_create'),
 
     url(r'^password_reset/$', PasswordResetView.as_view(email_template_name='registration/password_reset_email.html', template_name='registration/password_reset.html'), name='password_reset'),
@@ -21,3 +22,5 @@ urlpatterns = [
     url(r'^entrar/$', LoginView.as_view(), name='login'),
     url(r'^sair/$', LogoutView.as_view(), name='logout'),
 ]
+
+

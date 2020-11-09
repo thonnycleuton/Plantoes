@@ -58,7 +58,7 @@ class Feriado(models.Model):
     impedidos = models.CharField(max_length=300)
 
     def __str__(self):
-        return self.nome + str(self.data)
+        return self.nome + " - " + str(self.data)
 
     def populate(self):
         import urllib.request, json
