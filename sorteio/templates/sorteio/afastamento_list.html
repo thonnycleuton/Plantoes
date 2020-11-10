@@ -43,7 +43,7 @@
                       <tr>
                           <td><a href="{% url 'sorteio:defensor_detail' afastamento.defensor.pk %}">{{ forloop.counter }}</a></td>
                           <td>{{ afastamento.defensor }}</td>
-                          <td>{{afastamento.quant_afastamentos}}</td>
+                         <td>{{ afastamento.data_inicial|date:"d M Y" }} a {{ afastamento.data_final|date:"D d M Y" }}</td>
                       </tr>
                   {% empty %}
                   {% endfor %}

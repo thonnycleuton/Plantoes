@@ -35,9 +35,10 @@ class Defensor(models.Model):
     def quant_atuacao(self):
         return Sorteio.objects.filter(defensor=self).count()
 
-    def populate(self):
+    @staticmethod
+    def populate():
         import csv
-        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/defensores.csv') as csvfile:
+        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/Afastamentos.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 comarca = Comarca.objects.get(nome=row['comarca'].lower())
