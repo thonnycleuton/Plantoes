@@ -179,3 +179,4 @@ class FeriadoForm(forms.ModelForm):
         widgets = {
             'data': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
         }
+

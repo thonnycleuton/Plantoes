@@ -16,7 +16,7 @@
     <div class="">
       <div class="page-title">
         <div class="title_left">
-          <h3>2019 <small>07/01/2019 - 06/01/2020</small></h3>
+          <h3>2019 <small>06/01/2021 - 06/01/2022</small></h3>
         </div>
       </div>
 
@@ -49,13 +49,13 @@
 {#                This example shows FixedHeader being styling by the Bootstrap CSS framework.#}
 {#              </p>#}
 {#              <table id="datatable-buttons" class="table table-striped table-bordered">#}
-              <table id="datatable-fixed-header" class="table table-striped table-bordered">
+              <table id="datatable-buttons" class="table table-striped table-bordered">
                   <tbody>
                   {% for defensor in defensor_list %}
                       <tr>
                           <td><a href="{% url 'sorteio:defensor_detail' defensor.pk %}">{{ forloop.counter }}</a></td>
                           <td>{{ defensor.nome }}</td>
-                          <td>{{ defensor.comarca|capfirst }}</td>
+                          <td>{{ defensor.quant_atuacao }}</td>
                       </tr>
                   {% empty %}
                   {% endfor %}
@@ -64,7 +64,7 @@
                       <tr>
                           <th>Ordem</th>
                           <th>Defensor(a)</th>
-                          <th>Comarca</th>
+                          <th>Quantidade</th>
                       </tr>
                 </thead>
               </table>
