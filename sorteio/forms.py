@@ -6,7 +6,6 @@ from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
-
     dt_inicial = datetime.date(2021, 1, 6)
     dt_final = datetime.date(2021, 12, 19)
     recesso_inicial = datetime.date(2021, 12, 20)
@@ -33,102 +32,55 @@ class SorteioForm(forms.Form):
 
         return verificador
 
-    def sortear(self):
-        # lista de feriadoes especiais que geram impedimentos
-        Sorteio.objects.all().delete()
-        feriadao = []
-        for dia_feriado in self.feriados:
-            if 'Carnaval' in dia_feriado.nome or 'Semana Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
-                feriadao.append(dia_feriado)
-
-        # converte tipo RRULE para Date
-        workdays = [dia.date() for dia in self.workdays]
-        weekends = [dia.date() for dia in self.weekends]
-        recesso = [dia.date() for dia in self.recesso]
-
-        # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
+    def mover_feriados_dos_dias_uteis_para_fim_de_semana(self, workdays, weekends):
         for feriado in self.feriados:
             if feriado.data in workdays:
                 del workdays[workdays.index(feriado.data)]
             if feriado.data not in weekends:
                 weekends.append(feriado.data)
-        # ordena a lista de fins de semanas e feriados
-        weekends = sorted(weekends)
-        # laço para geração de sorteio para dias úteis da semana
+
+    def busca_feriados_prolongados(self):
+        feriadao = []
+        for dia_feriado in self.feriados:
+            if 'Carnaval' in dia_feriado.nome or 'Semana Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
+                feriadao.append(dia_feriado)
+        return feriadao
+
+    def definir_defensores_por_dia(self, days):
         defensores = Defensor.objects.all().order_by('?')
         count = 0
-        for day in workdays:
 
+        for day in days:
             while not Sorteio.objects.filter(data=day).first():
-
                 defensor = defensores[count]
                 afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
                 if afastamentos:
                     impedimento = False
-
                     for afastamento in afastamentos:
-
                         if afastamento.data_inicial <= day <= afastamento.data_final:
                             impedimento = True
-
                     if not impedimento:
                         Sorteio.objects.create(data=day, defensor=defensor)
                 else:
                     Sorteio.objects.create(data=day, defensor=defensor)
 
-                # count = count + 1 if count < len(defensores) - 1 else 0
                 if count < len(defensores) - 1:
                     count += 1
                 else:
                     defensores = Defensor.objects.all().order_by('?')
                     count = 0
 
-        # laço para geração de sorteio para dias de fim de semana
-        defensores = Defensor.objects.all().order_by('?')
-        count = 0
-        for day in weekends:
-
-            while not Sorteio.objects.filter(data=day).first():
-
-                defensor = defensores[count]
-
-                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
-
-                if afastamentos:
-                    impedimento = False
-
-                    for afastamento in afastamentos:
-
-                        if afastamento.data_inicial <= day <= afastamento.data_final:
-                            impedimento = True
-
-                    if not impedimento:
-                        Sorteio.objects.create(data=day, defensor=defensor)
-                else:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-
-                # count = count + 1 if count < len(defensores) - 1 else 0
-                if count < len(defensores) - 1:
-                    count += 1
-                else:
-                    defensores = Defensor.objects.all().order_by('?')
-                    count = 0
-
-        # laço para geração de sorteio para dias de recesso de fim de ano
+    def definir_defensores_do_recesso(self, recesso):
         defensores = Defensor.objects.exclude(recesso=True).order_by('?')
         count = 0
         for day in recesso:
-
             while not Sorteio.objects.filter(data=day).first():
-
                 defensor = defensores[count]
                 afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
 
                 if afastamentos:
-
                     for afastamento in afastamentos:
-
                         if not afastamento.data_inicial <= day <= afastamento.data_final:
                             if not Sorteio.objects.filter(data=day).first():
                                 Sorteio.objects.create(data=day, defensor=defensor)
@@ -147,6 +99,31 @@ class SorteioForm(forms.Form):
                 else:
                     defensores = Defensor.objects.all().order_by('?')
                     count = 0
+
+    def sortear(self):
+        # lista de feriadoes especiais que geram impedimentos
+        Sorteio.objects.all().delete()
+        feriadao = self.busca_feriados_prolongados()
+
+        # converte tipo RRULE para Date
+        workdays = [dia.date() for dia in self.workdays]
+        weekends = [dia.date() for dia in self.weekends]
+        recesso = [dia.date() for dia in self.recesso]
+
+        # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
+        self.mover_feriados_dos_dias_uteis_para_fim_de_semana(workdays, weekends)
+
+        # ordena a lista de fins de semanas e feriados
+        weekends = sorted(weekends)
+
+        # laço para geração de sorteio para dias úteis da semana
+        self.definir_defensores_por_dia(workdays)
+
+        # laço para geração de sorteio para dias de fim de semana
+        self.definir_defensores_por_dia(weekends)
+
+        # laço para geração de sorteio para dias de recesso de fim de ano
+        self.definir_defensores_do_recesso(recesso)
 
     # Pega o proximo dia disponivel em uma dada lista
     @staticmethod
