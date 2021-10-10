@@ -19,16 +19,15 @@ class Home(ListView):
 
 
 class SorteioFormView(FormView):
-    form_class = SorteioForm
+    form_class = TesteSorteioForm
     template_name = 'sorteio/sorteio_list.html'
     success_url = '/'
 
     def form_valid(self, form):
         form.sortear()
-        while not form.verificar_inconsistencia():
-            Sorteio.objects.all().delete()
-            form.sortear()
-
+        # while not form.verificar_inconsistencia():
+        #     Sorteio.objects.all().delete()
+        #     form.sortear()
         return super().form_valid(form)
 
 

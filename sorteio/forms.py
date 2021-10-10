@@ -5,135 +5,120 @@ from django import forms
 from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
 
 
-class SorteioForm(forms.Form):
+class TesteSorteioForm(forms.Form):
     dt_inicial = datetime.date(2021, 1, 6)
     dt_final = datetime.date(2021, 12, 19)
     recesso_inicial = datetime.date(2021, 12, 20)
-    recesso_final = datetime.date(2022, 1, 6)
+    recesso_final = datetime.date(2022, 1, 5)
     feriados = Feriado.objects.all()
 
     # cria uma lista de dias úteis em um dado periodo
     workdays = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(MO, TU, WE, TH, FR))
-    # cria uma lista de dias de fins de semana em um dado periodo
     weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
     recesso = rrule(DAILY, dtstart=recesso_inicial, until=recesso_final)
+    todos_os_dias = rrule(DAILY, dtstart=dt_inicial, until=recesso_final, byweekday=(MO, TU, WE, TH, FR, SA, SU))
+
+    sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
+    tentativas = 0 # Variável para análise de efecicienca
 
     def verificar_inconsistencia(self):
-
-        sorteados = Sorteio.objects.all().order_by('data')
-        count = 0
+        sorteados = sorted(self.sorteios, key=lambda x: x.data)
+        recesso = [dia.date() for dia in self.recesso]
         verificador = True
 
-        for plantao in range(sorteados.__len__() - 1):
-            if sorteados[count].defensor == sorteados[count + 1].defensor:
+        for posicao in range(sorteados.__len__() - 1):
+            if sorteados[posicao].defensor == sorteados[posicao + 1].defensor:
                 verificador = False
-                print('Realocando Duplicidade')
-            count += 1
-
+                break
+            elif sorteados[0].defensor == sorteados[-1].defensor:
+                verificador = False
+                break
+            elif sorteados[-1].data in recesso and sorteados[-1].defensor.recesso:
+                verificador = False
+                break
+        if not verificador:
+            print('Realocando Duplicidade')
         return verificador
 
-    def mover_feriados_dos_dias_uteis_para_fim_de_semana(self, workdays, weekends):
-        for feriado in self.feriados:
-            if feriado.data in workdays:
-                del workdays[workdays.index(feriado.data)]
-            if feriado.data not in weekends:
-                weekends.append(feriado.data)
-
-    def busca_feriados_prolongados(self):
-        feriadao = []
-        for dia_feriado in self.feriados:
-            if 'Carnaval' in dia_feriado.nome or 'Semana Santa' in dia_feriado.nome or 'Corpus Christi' in dia_feriado.nome:
-                feriadao.append(dia_feriado)
-        return feriadao
-
-    def definir_defensores_por_dia(self, days):
-        defensores = Defensor.objects.all().order_by('?')
-        count = 0
-
-        for day in days:
-            while not Sorteio.objects.filter(data=day).first():
-                defensor = defensores[count]
-                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
-
-                if afastamentos:
-                    impedimento = False
-                    for afastamento in afastamentos:
-                        if afastamento.data_inicial <= day <= afastamento.data_final:
-                            impedimento = True
-                    if not impedimento:
-                        Sorteio.objects.create(data=day, defensor=defensor)
-                else:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-
-                if count < len(defensores) - 1:
-                    count += 1
-                else:
-                    defensores = Defensor.objects.all().order_by('?')
-                    count = 0
-
-    def definir_defensores_do_recesso(self, recesso):
-        defensores = Defensor.objects.exclude(recesso=True).order_by('?')
-        count = 0
-        for day in recesso:
-            while not Sorteio.objects.filter(data=day).first():
-                defensor = defensores[count]
-                afastamentos = Afastamento.objects.filter(defensor_id=defensor.id)
-
-                if afastamentos:
-                    for afastamento in afastamentos:
-                        if not afastamento.data_inicial <= day <= afastamento.data_final:
-                            if not Sorteio.objects.filter(data=day).first():
-                                Sorteio.objects.create(data=day, defensor=defensor)
-                        else:
-                            data_realocamento = self.get_next_day(recesso, afastamento.data_final)
-                            try:
-                                Sorteio.objects.create(data=data_realocamento, defensor=defensor)
-                            except Exception as e:
-                                print(e, day, afastamento.data_final)
-                else:
-                    Sorteio.objects.create(data=day, defensor=defensor)
-
-                # count = count + 1 if count < len(defensores) - 1 else 0
-                if count < len(defensores) - 1:
-                    count += 1
-                else:
-                    defensores = Defensor.objects.all().order_by('?')
-                    count = 0
-
     def sortear(self):
-        # lista de feriadoes especiais que geram impedimentos
-        Sorteio.objects.all().delete()
-        feriadao = self.busca_feriados_prolongados()
-
+        # Limpa os dados do último sorteio antes de iniciar a nova geração
+        self.sorteios.clear()
         # converte tipo RRULE para Date
-        workdays = [dia.date() for dia in self.workdays]
-        weekends = [dia.date() for dia in self.weekends]
         recesso = [dia.date() for dia in self.recesso]
+        todos_os_dias = [dia.date() for dia in self.todos_os_dias]
+        todos_os_dias = sorted(todos_os_dias)
 
-        # remove feriados dos dias úteis e adiciona-os aos dias de fins de semana
-        self.mover_feriados_dos_dias_uteis_para_fim_de_semana(workdays, weekends)
+        # variaveis de controle para a geracao do sorteio
+        defensores = Defensor.objects.all().order_by('?')
+        nao_alocados = []
+        indice_do_dia = 0
+        indice_do_defensor = 0
+        ultimo_defensor_selecionado = None
 
-        # ordena a lista de fins de semanas e feriados
-        weekends = sorted(weekends)
+        while indice_do_dia < len(todos_os_dias):
+            dia = todos_os_dias[indice_do_dia]
 
-        # laço para geração de sorteio para dias úteis da semana
-        self.definir_defensores_por_dia(workdays)
+            # Seleciona o defensor se o não houver ninguem pendente de alocacao
+            if ultimo_defensor_selecionado == None:
+                defensor = defensores[indice_do_defensor]
+                indice_do_defensor += 1
+            else:
+                # Verifica se há alguém pendente de alocacao
+                if len(nao_alocados) > 0:
+                    # Verifica se a pessoa pendente de alocacao é diferente da ultima iteracao
+                    if nao_alocados[0] != ultimo_defensor_selecionado:
+                        defensor = nao_alocados[0]
+                        del nao_alocados[0]
+                    else:
+                        defensor = defensores[indice_do_defensor]
+                        indice_do_defensor += 1
+                else:
+                    # Verica se o atual defensor é o mesmo da ultima iteracao
+                    if defensores[indice_do_defensor] != ultimo_defensor_selecionado:
+                        defensor = defensores[indice_do_defensor]
+                        indice_do_defensor += 1
+                    else:
+                        nao_alocados.append(defensores[indice_do_defensor])
+                        indice_do_defensor += 1
 
-        # laço para geração de sorteio para dias de fim de semana
-        self.definir_defensores_por_dia(weekends)
+            # Impede que um defensor com direito a recesso seja alocado em um dia de recesso
+            # Caso seja verdade o loop é interrompido e um novo defensor é selecionado para a data
+            if dia in recesso and defensor.recesso:
+                continue
 
-        # laço para geração de sorteio para dias de recesso de fim de ano
-        self.definir_defensores_do_recesso(recesso)
+            # Informa o último defensor
+            afastamentos = defensor.afastamentos.all()
+            ultimo_defensor_selecionado = defensor
 
-    # Pega o proximo dia disponivel em uma dada lista
-    @staticmethod
-    def get_next_day(lista, dia):
-        """Metodo para buscar a próxima data disponível em uma dada lista"""
-        # TODO: Remover bug neste metodo. Provavelmente ocasionado pela mudanca do tipo de lista
-        for l in lista:
-            if l >= dia + datetime.timedelta(days=1):
-                if not Sorteio.objects.filter(data=l).first():
-                    return l
+            # Tratamento dos afastamentos, impede que um defensor afastado seja alocado em uma data de afastamento
+            if afastamentos.__len__() > 0:
+                impedimento = False
+                for afastamento in afastamentos:
+                    if afastamento.data_inicial <= dia <= afastamento.data_final:
+                        impedimento = True
+                        break
+                if not impedimento:
+                    self.sorteios.append(Sorteio(data=dia, defensor=defensor))
+                    indice_do_dia += 1
+            else:
+                self.sorteios.append(Sorteio(data=dia, defensor=defensor))
+                indice_do_dia += 1
+
+            # A lista de defensores foi percorrida e precisa ser reiniciada
+            if indice_do_defensor >= len(defensores):
+                defensores = Defensor.objects.all().order_by('?')
+                indice_do_defensor = 0
+        
+        # verifica a inconsistencia do sorteio para poder salvar os dados
+        while not self.verificar_inconsistencia():
+            self.sortear()
+        self.salvar_sorteio()
+    
+    def salvar_sorteio(self):
+        Sorteio.objects.all().delete()
+        for sorteio in self.sorteios:
+            sorteio.save()
+            print(f'Dia {sorteio.data} salvo')
 
 
 class AfastamentoForm(forms.ModelForm):
