@@ -19,7 +19,7 @@ class Home(ListView):
 
 
 class SorteioFormView(FormView):
-    form_class = TesteSorteioForm
+    form_class = SorteioForm
     template_name = 'sorteio/sorteio_list.html'
     success_url = '/'
 
