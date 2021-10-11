@@ -24,7 +24,7 @@ class SorteioFormView(FormView):
     success_url = '/'
 
     def form_valid(self, form):
-        form.sortear()
+        form.sortear(salvar_ao_finalizar=True)
         # while not form.verificar_inconsistencia():
         #     Sorteio.objects.all().delete()
         #     form.sortear()

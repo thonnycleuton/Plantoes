@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar</title>
+    <link rel="stylesheet" href="/static/usuarios/css/usuarios_style.css">
+</head>
+<body>
+    
+    <div class="card">
+        <h1>Login</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <p>
+                <label for="username">Nome de usuário</label><br>
+                <input type="text" name="username" id="username" placeholder="Digite o seu nome de usuário" required>
+            </p>
+            <p>
+                <label for="password">Senha</label><br>
+                <input type="password" name="password" id="password" placeholder="Digite a sua senha" required>
+            </p>
+
+            {% if messages %}
+            <div class="erros">
+                <ul>
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>
