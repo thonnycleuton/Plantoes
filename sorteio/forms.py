@@ -176,3 +176,15 @@ class FeriadoForm(forms.ModelForm):
             'data': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
         }
 
+class DefensorForm(forms.ModelForm):
+
+    class Meta:
+        model = Defensor
+        fields = '__all__'
+        widgets = {
+            'nome': forms.TextInput(attrs={"class": "form-control"}),
+            'comarca': forms.Select(attrs={"class": "form-control"}),
+            'setor': forms.TextInput(attrs={"class": "form-control"}),
+            'recesso': forms.CheckboxInput(attrs={"class": "form-control"})
+        }
+
