@@ -1,25 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sorteio</title>
-</head>
-<body>
-<table>
-    {% for datas in sorteio_list %}
-        <tr>
-            <td><a href="{% url 'sorteio:defensor_detail' datas.defensor.pk %}">{{ forloop.counter }} </a></td>
-            <td>{{ datas.data }} </td>
-            <td>{{ datas.defensor }} </td>
-        </tr>
-    {% empty %}
-        <form action="/sorteio" method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Sortear" />
-        </form>
-    {% endfor %}
-</table>
+{% extends "sorteio/app/base_site.html" %}
 
-</body>
-</html>
+{% block title %} Table Dynamic {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link href="/static/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
+  <link href="/static/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css" rel="stylesheet">
+  <link href="/static/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" rel="stylesheet">
+  <link href="/static/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" rel="stylesheet">
+  <link href="/static/vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+  <div class="right_col" role="main" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <table >
+        {% for datas in sorteio_list %}
+            <tr>
+                <td><a href="{% url 'sorteio:defensor_detail' datas.defensor.pk %}">{{ forloop.counter }} </a></td>
+                <td>{{ datas.data }} </td>
+                <td>{{ datas.defensor }} </td>
+            </tr>
+        {% empty %}
+            <form action="/sorteio" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Sortear" id="btn-sortear" style="padding: 8px 16px;" onclick="mostrarMensagem()"/><br>
+                <div id="mensagem" style="text-align: center; display: none;">
+                    <h1>Sorteio em execução</h1>
+                    <h2>Aguarde, esse processo pode levar alguns minutos!</h2>
+                </div>
+            </form>
+        {% endfor %}
+    </table>
+  </div>
+
+  <script>
+      var messagem = document.getElementById('mensagem');
+      function mostrarMensagem(){
+          mensagem.style.display = 'block';
+      }
+  </script>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+  <!-- Datatables -->
+  <script src="/static/vendors/datatables.net/js/jquery.dataTables.min.js"></script>
+  <script src="/static/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+  <script src="/static/vendors/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+  <script src="/static/vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+  <script src="/static/vendors/datatables.net-buttons/js/buttons.flash.min.js"></script>
+  <script src="/static/vendors/datatables.net-buttons/js/buttons.html5.min.js"></script>
+  <script src="/static/vendors/datatables.net-buttons/js/buttons.print.min.js"></script>
+  <script src="/static/vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+  <script src="/static/vendors/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+  <script src="/static/vendors/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js"></script>
+  <script src="/static/vendors/datatables.net-scroller/js/dataTables.scroller.min.js"></script>
+  <script src="/static/vendors/jszip/dist/jszip.min.js"></script>
+  <script src="/static/vendors/pdfmake/build/pdfmake.min.js"></script>
+  <script src="/static/vendors/pdfmake/build/vfs_fonts.js"></script>
+{% endblock javascripts %}
+

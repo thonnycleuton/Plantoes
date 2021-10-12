@@ -1,0 +1,30 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>Login</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <p>
+            <label for="username">Nome de usuário</label><br>
+            <input type="text" name="username" id="username" placeholder="Digite o seu nome de usuário" required>
+        </p>
+        <p>
+            <label for="password">Senha</label><br>
+            <input type="password" name="password" id="password" placeholder="Digite a sua senha" required>
+        </p>
+
+        {% if messages %}
+        <div class="erros">
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn">Entrar</button>
+    </form>
+</div>
+{% endblock %}

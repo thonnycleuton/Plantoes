@@ -33,10 +33,9 @@
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Settings 1</a>
-                    </li>
-                    <li><a href="#">Settings 2</a>
-                    </li>
+                    <li><a href="{% url 'sorteio:afastamento_create' %}">Adicionar afastamento</a></li>
+                    <li><a href="{% url 'sorteio:defensore_edit' defensor.id %}">Editar dados</a></li>
+                    <li><a href="{% url 'sorteio:defensor_delete' defensor.id %}">Remover defensor</a></li>
                   </ul>
                 </li>
                 <li><a class="close-link"><i class="fa fa-close"></i></a>
@@ -55,6 +54,7 @@
                           <td> {{ forloop.counter }} </td>
                           <td> {{ afastamento.data_inicial|date:"D d M Y" }} </td>
                           <td> {{ afastamento.data_final|date:"D d M Y" }} </td>
+                          <td> <a href="{% url 'sorteio:afastamento_delete' afastamento.id %}">remover</a> </td> 
                       </tr>
                   {% empty %}
 
@@ -65,6 +65,7 @@
                           <th>Ordem</th>
                           <th>Data inicio</th>
                           <th>Data Fim</th>
+                          <th></th>
                       </tr>
                 </thead>
               </table>
