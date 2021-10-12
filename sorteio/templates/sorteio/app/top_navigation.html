@@ -17,6 +17,7 @@
         </a>
         <ul class="dropdown-menu dropdown-usermenu pull-right">
           {% if user.is_authenticated %}
+          <li><a href="{% url 'usuario:change_password' %}"><i class="fa fa-key pull-right"></i>Alterar senha</a></li>
           <li><a href="/usuario/sair"><i class="fa fa-sign-out pull-right"></i>Encerrar sessão</a></li>
           {% else %}
           <li><a href="/usuario/entrar"><i class="fa fa-sign-in pull-right"></i>Entrar</a></li>
