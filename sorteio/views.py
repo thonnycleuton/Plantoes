@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -18,7 +21,9 @@ class Home(ListView):
     template_name = 'sorteio/app/tables_dynamic.html'
 
 
-class SorteioFormView(FormView):
+class SorteioFormView(LoginRequiredMixin, FormView):
+    login_url = '/usuario/entrar'
+    redirect_field_name = 'redirect_to'
     form_class = SorteioForm
     template_name = 'sorteio/sorteio_list.html'
     success_url = '/'
