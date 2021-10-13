@@ -43,7 +43,6 @@ class SorteioForm(forms.Form):
 
         diferenca = max - min
         if diferenca > 3:
-            print(f'Min: {min}, Max: {max}, Diferenca: {diferenca}')
             return False
         return True
 
@@ -152,7 +151,6 @@ class SorteioForm(forms.Form):
         Sorteio.objects.all().delete()
         for sorteio in self.sorteios:
             sorteio.save()
-            print(f'Dia {sorteio.data} salvo')
 
 
 class AfastamentoForm(forms.ModelForm):

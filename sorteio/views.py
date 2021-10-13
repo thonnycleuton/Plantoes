@@ -139,5 +139,5 @@ class AfastamentoDeleteView(LoginRequiredMixin, View):
         if len(afastamentos) > 0:
             defensor = afastamentos[0].defensor
             afastamentos[0].delete()
-            return redirect(f'/defensor/detalhes/{defensor.id}')
+            return redirect('/defensor/detalhes/{}'.format(defensor.id))
         return redirect('/defensores')
