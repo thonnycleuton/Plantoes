@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 from datetime import date
 
-from django.test import TestCase
+from unittest import TestCase
 
 from sorteio.forms import SorteioForm
+from .models import Comarca, Defensor
 
 # Create your tests here.
 class SorteioFormTestCase(TestCase):
@@ -77,3 +78,23 @@ class SorteioFormTestCase(TestCase):
 
         diferenca = max - min
         self.assertLessEqual(diferenca, 3, 'Diferenca de quem possui mais sorteios para menos sorteios é de tres ou mesno')
+
+
+class SorteioRecessoTestCase(TestCase):
+
+    form = SorteioForm()
+    comarca_filter = Comarca.objects.filter(nome='teresina')
+    teresina = comarca_filter[0]
+    form.sortear_somente_recesso(comarca=teresina, salvar_ao_finalizar=False)
+
+    def test_nao_ha_duplicidade(self):
+        sorteios = self.form.sorteios
+        dados_validos = True
+
+        for indice in range(len(sorteios) - 1):
+            if sorteios[indice].defensor == sorteios[indice + 1].defensor:
+                dados_validos = False
+                break
+
+        self.assertEqual(dados_validos, True, 'Nao ha duplicidade entre os dias do sorteio')
+
