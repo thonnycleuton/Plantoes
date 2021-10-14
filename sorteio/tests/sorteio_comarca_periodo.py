@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 import datetime
 from unittest import TestCase
 from dateutil.rrule import DAILY, rrule
-from sorteio.forms import SorteioForm
+from sorteio.forms import SorteioBlocoPeriodoForm
 from sorteio.models import Comarca
 
 
 class SorteioRecessoTestCase(TestCase):
-    form = SorteioForm()
+    form = SorteioBlocoPeriodoForm()
     comarca_filter = Comarca.objects.filter(nome='oeiras')
     picos = comarca_filter[0]
     data_inicial=datetime.date(2021, 12, 20)

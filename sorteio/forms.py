@@ -1,10 +1,23 @@
+# -*- coding: utf-8 -*-
 import datetime
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
 from django import forms
-from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
+from django.db.models import query
+from sorteio.models import Comarca, Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
+    # dados do formulário
+    options = []
+    query = Comarca.objects.all()
+    for comarca in query:
+        if comarca.minimo_de_defensores(10):
+            options.append(comarca)
+
+    comarca = forms.ChoiceField(
+        choices=[(query.pk, query.nome) for query in options], 
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
     dt_inicial = datetime.date(2021, 1, 6)
     dt_final = datetime.date(2021, 12, 19)
     recesso_inicial = datetime.date(2021, 12, 20)
@@ -113,10 +126,15 @@ class SorteioForm(forms.Form):
     def buscar_deferensores_do_banco_de_dados(self, comarca):
         self.defensores = Defensor.objects.filter(comarca=comarca).order_by('?')
 
+    def sem_defensores(self):
+        return len(self.defensores) == 0
+
     def sortear(self, comarca, salvar_ao_finalizar=False):
         self.limpar_dados()
         self.buscar_deferensores_do_banco_de_dados(comarca)
-        
+        if self.sem_defensores():
+            return
+
         # converte tipo RRULE para Date
         recesso = [dia.date() for dia in self.recesso]
         todos_os_dias = sorted([dia.date() for dia in self.todos_os_dias])
@@ -161,9 +179,49 @@ class SorteioForm(forms.Form):
         if salvar_ao_finalizar:
             self.salvar_sorteio()
 
+    def salvar_sorteio(self):
+        Sorteio.objects.filter(defensor__in=self.defensores).delete()
+        for sorteio in self.sorteios:
+            sorteio.save()
+ 
+class SorteioBlocoPeriodoForm(forms.Form):
+    # dados do formulário
+    options = []
+    query = Comarca.objects.all()
+    for comarca in query:
+        if comarca.ha_mais_de_um_defensor:
+            options.append(comarca)
+
+    inicio = forms.DateField(
+        required=True, 
+        initial=datetime.date(2021, 12, 20),
+        widget=forms.DateInput(attrs={'class': 'form-control'})
+    )
+    fim = forms.DateField(
+        required=True, 
+        initial=datetime.date(2022, 1, 6),
+        widget=forms.DateInput(attrs={'class': 'form-control'})
+    )
+    comarca = forms.ChoiceField(
+        choices=[(query.pk, query.nome) for query in options],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    recesso_inicial = datetime.date(2021, 12, 20)
+    recesso_final = datetime.date(2022, 1, 5)
+    sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
+    defensores = []
+
+    def buscar_deferensores_do_banco_de_dados(self, comarca):
+        self.defensores = Defensor.objects.filter(comarca=comarca).order_by('?')
+
+    def sem_defensores(self):
+        return len(self.defensores) == 0
+
     def sortear_por_periodo_e_bloco(self, comarca, data_inicial=None, data_final=None, salvar_ao_finalizar=False):
-        self.limpar_dados()
         self.buscar_deferensores_do_banco_de_dados(comarca)
+        if self.sem_defensores():
+            return
         data_inicial = data_inicial if data_inicial != None else self.recesso_inicial
         data_final = data_final if data_final != None else datetime.date(2022, 1, 6)
         
@@ -188,9 +246,8 @@ class SorteioForm(forms.Form):
         if salvar_ao_finalizar:
             self.salvar_sorteio()
 
-
     def salvar_sorteio(self):
-        Sorteio.objects.all().delete()
+        Sorteio.objects.filter(defensor__in=self.defensores).delete()
         for sorteio in self.sorteios:
             sorteio.save()
 

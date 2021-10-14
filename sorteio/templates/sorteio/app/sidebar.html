@@ -17,7 +17,13 @@
                         <li><a href="{% url 'sorteio:home' %}">2020</a></li>
                     </ul>
                 </li>
-                <li><a href="{% url 'sorteio:sorteio_form' %}"><i class="fa fa-outdent"></i> Sortear </a>
+                <li><a><i class="fa fa-outdent"></i> Sortear <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        <li><a href="{% url 'sorteio:sorteio_form' %}">Aleatório</a></li>
+                        <li><a href="{% url 'sorteio:sorteio_bloco_periodo' %}">Por bloco e período</a></li>
+                    </ul>
+                </li>
+
                 <li><a><i class="fa fa-user"></i> Defensores <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                         <li><a href="{% url 'sorteio:defensore_list' %}">Todos</a></li>

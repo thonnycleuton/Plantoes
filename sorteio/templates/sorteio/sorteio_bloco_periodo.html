@@ -17,33 +17,64 @@
   <div class="info full-width" style="padding-right: 32px;">
     <h1>Informações</h1>
     <p>
-      Nessa modalidade de sorteio os dados serão ordenados de forma aleatória e ser atribuida à todos os dias do ano,
-      um defensor pode ser selecionado várias vezes para dias diferentes seguindo as regras estabelecidas abaixo
+      Nessa modalidade de sorteio os dados serão registrados seguindo o conceito de blocos, abaixo os passos para a
+      deficinição dos defensores e alocação nos blocos
     </p>
 
-    <h3>Regras</h3>
+    <h3>Passos</h3>
     <ul>
-      <li>Para o sorteio aleatório a comarca deve possui pelo menos 10 defensores vinculados;</li>
-      <li>Um defensor não pode ser alocado dois dias seguidos;</li>
-      <li>Um defensor com direito ao recesso não pode ser alocado no recesso do período;</li>
-      <li>Um defensor não pode ser alocado se no período de afastamento.</li>
+      <li>Os defensores são sorteados e uma ordem aleatória é definida;</li>
+      <li>A ordem definida refere-se ao bloco que o defensor irá assumir, abaixo exemplo;
+        <ol>
+          <li>Bloco 01 - Defensor 03
+            <ul>
+              <li>data: 20/12/2021</li>
+              <li>data: 21/12/2021</li>
+              <li>data: 22/12/2021</li>
+              <li>data: 23/12/2021</li>
+              <li>data: 24/12/2021</li>
+              <li>data: 25/12/2021</li>
+            </ul>
+          </li>
+          <li>Bloco 02 - Defensor 01
+            <ul>
+              <li>data: 26/12/2021</li>
+              <li>data: 27/12/2021</li>
+              <li>data: 28/12/2021</li>
+              <li>data: 29/12/2021</li>
+              <li>data: 30/12/2021</li>
+              <li>data: 31/12/2021</li>
+            </ul>
+          </li>
+          <li>Bloco 03 - Defensor 02
+            <ul>
+              <li>data: 01/01/2022</li>
+              <li>data: 02/01/2022</li>
+              <li>data: 03/01/2022</li>
+              <li>data: 04/01/2022</li>
+              <li>data: 05/01/2022</li>
+              <li>data: 06/01/2022</li>
+            </ul>
+          </li>
+        </ol>
+      </li>
     </ul>
 
     <h3>Utilização</h3>
 
     <ul>
-      <li>Selecione a "comarca" que será sorteada</li>
+      <li>Selecione a "comarca" que será sorteada;</li>
       <li>Clique em "sortear"
         <ul>
           <li>Se o defensor da comarca selecionada já tiver com alocações registradas, elas serão sobrescrevidas</li>
         </ul>
       </li>
-      <li>Aguarde a finalização do sorteio</li>
+      <li>Aguarde a finalização do sorteio.</li>
     </ul>
 
   </div>
   <div class="full-width">
-    <form action="/sorteio" method="POST">
+    <form action="/sorteio/periodo" method="POST">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" value="Sortear" id="btn-sortear" style="padding: 8px 16px;" class="full-width"

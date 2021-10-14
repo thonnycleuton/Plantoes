@@ -12,12 +12,19 @@ class Comarca(models.Model):
     cod_ibge = models.CharField(max_length=8)
     nome = models.CharField(max_length=100)
 
+    @property
+    def ha_mais_de_um_defensor(self):
+        return len(self.defensores.all()) > 1
+
+    def minimo_de_defensores(self, valor):
+        return len(self.defensores.all()) >= valor
+
     def __str__(self):
         return self.nome
 
     def populate(self):
         import csv
-        with open('/home/thonnycleuton/PycharmProjects/Plantoes/sorteio/loads/DTB_BRASIL_MUNICIPIO.csv') as csvfile:
+        with open('/home/pedrohenrique/Github/Plantoes/sorteio/loads/DTB_BRASIL_MUNICIPIO.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Comarca.objects.get_or_create(nome=row['Nome_Município'], cod_ibge=row['Código Município Completo'])
@@ -25,7 +32,7 @@ class Comarca(models.Model):
 
 class Defensor(models.Model):
     nome = models.CharField(max_length=100)
-    comarca = models.ForeignKey(Comarca)
+    comarca = models.ForeignKey(Comarca, related_name='defensores')
     setor = models.CharField(max_length=20)
     recesso = models.BooleanField(default=False)
 
