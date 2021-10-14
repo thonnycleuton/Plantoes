@@ -31,10 +31,8 @@ class SorteioFormView(LoginRequiredMixin, FormView):
     success_url = '/'
 
     def form_valid(self, form):
-        form.sortear(salvar_ao_finalizar=True)
-        # while not form.verificar_inconsistencia():
-        #     Sorteio.objects.all().delete()
-        #     form.sortear()
+        comarca = Comarca.objects.filter(nome='teresina')
+        form.sortear(comarca=comarca[0], salvar_ao_finalizar=True)
         return super().form_valid(form)
 
 

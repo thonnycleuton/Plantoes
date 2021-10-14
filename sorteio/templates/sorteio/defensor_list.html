@@ -53,6 +53,7 @@
                   <tr>
                     <td><a href="{% url 'sorteio:defensor_detail' defensor.pk %}">{{ forloop.counter }}</a></td>
                     <td><a href="/defensor/detalhes/{{defensor.id}}">{{ defensor.nome }}</a></td>
+                    <td>{{ defensor.comarca }}</td>
                     <td>{{ defensor.afastamentos.all.count }}</td>
                     <td>{{ defensor.quant_atuacao }}</td>
                   </tr>
@@ -63,6 +64,7 @@
                   <tr>
                     <th>Ordem</th>
                     <th>Defensor(a)</th>
+                    <th>Comarca</th>
                     <th>Afastamentos</th>
                     <th>Sorteios</th>
                   </tr>
