@@ -219,6 +219,7 @@ class SorteioBlocoPeriodoForm(forms.Form):
         return len(self.defensores) == 0
 
     def sortear_por_periodo_e_bloco(self, comarca, data_inicial=None, data_final=None, salvar_ao_finalizar=False):
+        self.sorteios.clear()
         self.buscar_deferensores_do_banco_de_dados(comarca)
         if self.sem_defensores():
             return
