@@ -11,17 +11,17 @@ class SorteioForm(forms.Form):
     options = []
     query = Comarca.objects.all()
     for comarca in query:
-        if comarca.minimo_de_defensores(10):
+        if comarca.minimo_de_defensores(20):
             options.append(comarca)
 
     comarca = forms.ChoiceField(
         choices=[(query.pk, query.nome) for query in options], 
         widget=forms.Select(attrs={'class': 'form-control'}))
 
-    dt_inicial = datetime.date(2021, 1, 6)
-    dt_final = datetime.date(2021, 12, 19)
-    recesso_inicial = datetime.date(2021, 12, 20)
-    recesso_final = datetime.date(2022, 1, 5)
+    dt_inicial = datetime.date(2022, 1, 6)
+    dt_final = datetime.date(2022, 12, 19)
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
     feriados = Feriado.objects.all()
 
     # cria uma lista de dias úteis em um dado periodo
@@ -194,12 +194,12 @@ class SorteioBlocoPeriodoForm(forms.Form):
 
     inicio = forms.DateField(
         required=True, 
-        initial=datetime.date(2021, 12, 20),
+        initial=datetime.date(2022, 12, 20),
         widget=forms.DateInput(attrs={'class': 'form-control'})
     )
     fim = forms.DateField(
         required=True, 
-        initial=datetime.date(2022, 1, 6),
+        initial=datetime.date(2023, 1, 6),
         widget=forms.DateInput(attrs={'class': 'form-control'})
     )
     comarca = forms.ChoiceField(
@@ -207,8 +207,8 @@ class SorteioBlocoPeriodoForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    recesso_inicial = datetime.date(2021, 12, 20)
-    recesso_final = datetime.date(2022, 1, 5)
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
     sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
     defensores = []
 

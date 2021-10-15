@@ -71,9 +71,10 @@ class Feriado(models.Model):
 
     @staticmethod
     def populate():
+        Feriado.objects.all().delete()
         import urllib.request, json
         with urllib.request.urlopen(
-                "https://api.calendario.com.br/?json=true&ano=2021&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
+                "https://api.calendario.com.br/?json=true&ano=2022&ibge=2211001&token=dGhvbm55Y2xldXRvbkBnbWFpbC5jb20maGFzaD05MzU5MzQx") as url:
             hollidays = json.loads(url.read().decode())
 
         for holliday in hollidays:

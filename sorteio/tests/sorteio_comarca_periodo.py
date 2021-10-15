@@ -11,8 +11,8 @@ class SorteioRecessoTestCase(TestCase):
     form = SorteioBlocoPeriodoForm()
     comarca_filter = Comarca.objects.filter(nome='oeiras')
     picos = comarca_filter[0]
-    data_inicial=datetime.date(2021, 12, 20)
-    data_final=datetime.date(2022, 1, 6)
+    data_inicial=datetime.date(2022, 12, 20)
+    data_final=datetime.date(2023, 1, 6)
     form.sortear_por_periodo_e_bloco(
         comarca=picos, 
         salvar_ao_finalizar=False, 
