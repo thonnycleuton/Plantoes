@@ -53,6 +53,7 @@
                   <tr>
                     <td><a href="{% url 'sorteio:defensor_detail' datas.defensor.pk %}">{{ forloop.counter }} </a></td>
                     <td>{{ datas.defensor }}</td>
+                    <td>{{ datas.defensor.comarca }}</td>
                     <td>{{ datas.data|date:"d M" }}</td>
                     <td>{{ datas.data|date:"l" }}</td>
                     <td>{{ datas.defensor.quant_atuacao }}</td>
@@ -64,6 +65,7 @@
                   <tr>
                     <th>Ordem</th>
                     <th>Defensor(a)</th>
+                    <th>Comarca</th>
                     <th>Data</th>
                     <th>Dia da Semana</th>
                     <th>Atuacoes</th>
