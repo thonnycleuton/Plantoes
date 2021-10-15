@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from datetime import date
-
-from django.test import TestCase
-
+from unittest import TestCase
 from sorteio.forms import SorteioForm
+from sorteio.models import Comarca
 
-# Create your tests here.
+
 class SorteioFormTestCase(TestCase):
     form = SorteioForm()
-    form.sortear()
+    comarca_filter = Comarca.objects.filter(nome='teresina')
+    teresina = comarca_filter[0]
+    form.sortear(comarca=teresina, salvar_ao_finalizar=False)
 
     def test_defesor_de_recesso_nao_alocados_no_recesso(self):
         sorteios = self.form.sorteios
@@ -24,21 +24,7 @@ class SorteioFormTestCase(TestCase):
 
     def test_nao_ha_duplicidade_na_virada_do_ano(self):
         sorteios = self.form.sorteios
-        dados_validos = True
-        indice_virada_do_ano = 0
-        indice_ano_novo = 0
-
-        for indice in range(len(sorteios)):
-            
-            if sorteios[indice].data == date(2022, 1, 1):
-                indice_ano_novo = indice
-            if sorteios[indice].data == date(2021, 12, 31):
-                indice_virada_do_ano = indice
-
-        if sorteios[indice_virada_do_ano].defensor == sorteios[indice_ano_novo].defensor:
-            dados_validos = False
-
-        self.assertEqual(dados_validos, True, 'O defensor que irá trabalhar no final do ano não irá trabalhar no dia primeiro')
+        self.assertEqual(sorteios[0].defensor != sorteios[-1].defensor, True, 'O defensor que irá trabalhar no final do ano não irá trabalhar no dia primeiro')
 
     def test_nao_ha_duplicidade(self):
         sorteios = self.form.sorteios

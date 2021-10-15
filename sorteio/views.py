@@ -31,10 +31,25 @@ class SorteioFormView(LoginRequiredMixin, FormView):
     success_url = '/'
 
     def form_valid(self, form):
-        form.sortear(salvar_ao_finalizar=True)
-        # while not form.verificar_inconsistencia():
-        #     Sorteio.objects.all().delete()
-        #     form.sortear()
+        id_selecionado = int(form.cleaned_data['comarca'])
+        comarca = Comarca.objects.filter(id=id_selecionado)
+        form.sortear(comarca=comarca[0], salvar_ao_finalizar=True)
+        return super().form_valid(form)
+
+
+class SorteioBlocoPeriodoFormView(LoginRequiredMixin, FormView):
+    login_url = '/usuario/entrar'
+    redirect_field_name = 'redirect_to'
+    form_class = SorteioBlocoPeriodoForm
+    template_name = 'sorteio/sorteio_bloco_periodo.html'
+    success_url = '/'
+    
+    def form_valid(self, form):
+        id_selecionado = int(form.cleaned_data['comarca'])
+        inicio = form.cleaned_data['inicio']
+        fim = form.cleaned_data['fim']
+        comarca = Comarca.objects.filter(id=id_selecionado)
+        form.sortear_por_periodo_e_bloco(comarca=comarca[0], data_inicial=inicio, data_final=fim, salvar_ao_finalizar=True)
         return super().form_valid(form)
 
 
@@ -139,5 +154,5 @@ class AfastamentoDeleteView(LoginRequiredMixin, View):
         if len(afastamentos) > 0:
             defensor = afastamentos[0].defensor
             afastamentos[0].delete()
-            return redirect(f'/defensor/detalhes/{defensor.id}')
+            return redirect('/defensor/detalhes/{}'.format(defensor.id))
         return redirect('/defensores')

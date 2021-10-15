@@ -1,15 +1,27 @@
+# -*- coding: utf-8 -*-
 import datetime
-
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
 from django import forms
-from sorteio.models import Defensor, Sorteio, Feriado, Afastamento
+from django.db.models import query
+from sorteio.models import Comarca, Defensor, Sorteio, Feriado, Afastamento
 
 
 class SorteioForm(forms.Form):
-    dt_inicial = datetime.date(2021, 1, 6)
-    dt_final = datetime.date(2021, 12, 19)
-    recesso_inicial = datetime.date(2021, 12, 20)
-    recesso_final = datetime.date(2022, 1, 5)
+    # dados do formulário
+    options = []
+    query = Comarca.objects.all()
+    for comarca in query:
+        if comarca.minimo_de_defensores(20):
+            options.append(comarca)
+
+    comarca = forms.ChoiceField(
+        choices=[(query.pk, query.nome) for query in options], 
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    dt_inicial = datetime.date(2022, 1, 6)
+    dt_final = datetime.date(2022, 12, 19)
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
     feriados = Feriado.objects.all()
 
     # cria uma lista de dias úteis em um dado periodo
@@ -19,9 +31,14 @@ class SorteioForm(forms.Form):
     todos_os_dias = rrule(DAILY, dtstart=dt_inicial, until=recesso_final, byweekday=(MO, TU, WE, TH, FR, SA, SU))
 
     sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
+    nao_alocados = []
+    indice_do_defensor = 0
+    ultimo_defensor_selecionado = None
+    defensores = []
 
-    def diferenca_de_dias_e_valida(self):
-        defensores = Defensor.objects.all()
+    # Verifica quem possui mais ou menos dias ], a diferenca deve ser menor ou igual a 3
+    def diferenca_de_dias_valida(self):
+        defensores = self.defensores
         contagem_defensores = []
 
         # Verifica a quantidade de dias dos defensores sorteados
@@ -43,7 +60,6 @@ class SorteioForm(forms.Form):
 
         diferenca = max - min
         if diferenca > 3:
-            print(f'Min: {min}, Max: {max}, Diferenca: {diferenca}')
             return False
         return True
 
@@ -67,60 +83,80 @@ class SorteioForm(forms.Form):
             print('Realocando Duplicidade')
         return verificador
 
-    def sortear(self, salvar_ao_finalizar=False):
-        # Limpa os dados do último sorteio antes de iniciar a nova geração
+    # Seleciona o defensor se o não houver ninguem pendente de alocacao
+    def selecionar_defensor(self):
+        if self.ultimo_defensor_selecionado == None:
+            defensor = self.defensores[self.indice_do_defensor]
+            self.indice_do_defensor += 1
+            return defensor
+        else:
+            # Verifica se há alguém pendente de alocacao
+            if len(self.nao_alocados) > 0:
+                # Verifica se a pessoa pendente de alocacao é diferente da ultima iteracao
+                if self.nao_alocados[0] != self.ultimo_defensor_selecionado:
+                    defensor = self.nao_alocados[0]
+                    del self.nao_alocados[0]
+                    return defensor
+                else:
+                    # Verifica se o atual defensor é o mesmo da ultima iteracao
+                    if self.defensores[self.indice_do_defensor] != self.ultimo_defensor_selecionado:
+                        defensor = self.defensores[self.indice_do_defensor]
+                        self.indice_do_defensor += 1
+                        return defensor
+                    else:
+                        self.nao_alocados.append(self.defensores[self.indice_do_defensor])
+                        self.indice_do_defensor += 1
+            else:
+                # Verica se o atual defensor é o mesmo da ultima iteracao
+                if self.defensores[self.indice_do_defensor] != self.ultimo_defensor_selecionado:
+                    defensor = self.defensores[self.indice_do_defensor]
+                    self.indice_do_defensor += 1
+                    return defensor
+                else:
+                    self.nao_alocados.append(self.defensores[self.indice_do_defensor])
+                    self.indice_do_defensor += 1
+
+    def limpar_dados(self):
+        # Limpa os dados do último sorteio antes de iniciar o novo sorteio
         self.sorteios.clear()
+        self.nao_alocados.clear()
+        self.indice_do_defensor = 0
+        self.ultimo_defensor_selecionado = None
+
+    def buscar_deferensores_do_banco_de_dados(self, comarca):
+        self.defensores = Defensor.objects.filter(comarca=comarca).order_by('?')
+
+    def sem_defensores(self):
+        return len(self.defensores) == 0
+
+    def sortear(self, comarca, salvar_ao_finalizar=False):
+        self.limpar_dados()
+        self.buscar_deferensores_do_banco_de_dados(comarca)
+        if self.sem_defensores():
+            return
+
         # converte tipo RRULE para Date
         recesso = [dia.date() for dia in self.recesso]
-        todos_os_dias = [dia.date() for dia in self.todos_os_dias]
-        todos_os_dias = sorted(todos_os_dias)
+        todos_os_dias = sorted([dia.date() for dia in self.todos_os_dias])
 
         # variaveis de controle para a geracao do sorteio
-        defensores = Defensor.objects.all().order_by('?')
-        nao_alocados = []
         indice_do_dia = 0
-        indice_do_defensor = 0
-        ultimo_defensor_selecionado = None
-
         while indice_do_dia < len(todos_os_dias):
-            dia = todos_os_dias[indice_do_dia]
+            # A lista de defensores foi percorrida e precisa ser reiniciada
+            if self.indice_do_defensor >= len(self.defensores):
+                self.buscar_deferensores_do_banco_de_dados(comarca)
+                self.indice_do_defensor = 0
 
-            # Seleciona o defensor se o não houver ninguem pendente de alocacao
-            if ultimo_defensor_selecionado == None:
-                defensor = defensores[indice_do_defensor]
-                indice_do_defensor += 1
-            else:
-                # Verifica se há alguém pendente de alocacao
-                if len(nao_alocados) > 0:
-                    # Verifica se a pessoa pendente de alocacao é diferente da ultima iteracao
-                    if nao_alocados[0] != ultimo_defensor_selecionado:
-                        defensor = nao_alocados[0]
-                        del nao_alocados[0]
-                    else:
-                        # Verica se o atual defensor é o mesmo da ultima iteracao
-                        if defensores[indice_do_defensor] != ultimo_defensor_selecionado:
-                            defensor = defensores[indice_do_defensor]
-                            indice_do_defensor += 1
-                        else:
-                            nao_alocados.append(defensores[indice_do_defensor])
-                            indice_do_defensor += 1
-                else:
-                    # Verica se o atual defensor é o mesmo da ultima iteracao
-                    if defensores[indice_do_defensor] != ultimo_defensor_selecionado:
-                        defensor = defensores[indice_do_defensor]
-                        indice_do_defensor += 1
-                    else:
-                        nao_alocados.append(defensores[indice_do_defensor])
-                        indice_do_defensor += 1
+            dia = todos_os_dias[indice_do_dia]
+            defensor = self.selecionar_defensor()
 
             # Impede que um defensor com direito a recesso seja alocado em um dia de recesso
-            # Caso seja verdade o loop é interrompido e um novo defensor é selecionado para a data
-            if dia in recesso and defensor.recesso:
+            if defensor == None or dia in recesso and defensor.recesso:
                 continue
 
             # Informa o último defensor
             afastamentos = defensor.afastamentos.all()
-            ultimo_defensor_selecionado = defensor
+            self.ultimo_defensor_selecionado = defensor
 
             # Tratamento dos afastamentos, impede que um defensor afastado seja alocado em uma data de afastamento
             if afastamentos.__len__() > 0:
@@ -135,24 +171,86 @@ class SorteioForm(forms.Form):
             else:
                 self.sorteios.append(Sorteio(data=dia, defensor=defensor))
                 indice_do_dia += 1
-
-            # A lista de defensores foi percorrida e precisa ser reiniciada
-            if indice_do_defensor >= len(defensores):
-                defensores = Defensor.objects.all().order_by('?')
-                indice_do_defensor = 0
         
         # verifica a inconsistencia do sorteio para poder salvar os dados
-        while not self.verificar_inconsistencia() or not self.diferenca_de_dias_e_valida():
-            self.sortear()
+        while not self.verificar_inconsistencia() or not self.diferenca_de_dias_valida():
+            self.sortear(comarca=comarca, salvar_ao_finalizar=salvar_ao_finalizar)
 
         if salvar_ao_finalizar:
             self.salvar_sorteio()
-    
+
     def salvar_sorteio(self):
-        Sorteio.objects.all().delete()
+        Sorteio.objects.filter(defensor__in=self.defensores).delete()
         for sorteio in self.sorteios:
             sorteio.save()
-            print(f'Dia {sorteio.data} salvo')
+ 
+class SorteioBlocoPeriodoForm(forms.Form):
+    # dados do formulário
+    options = []
+    query = Comarca.objects.all()
+    for comarca in query:
+        if comarca.ha_mais_de_um_defensor:
+            options.append(comarca)
+
+    inicio = forms.DateField(
+        required=True, 
+        initial=datetime.date(2022, 12, 20),
+        widget=forms.DateInput(attrs={'class': 'form-control'})
+    )
+    fim = forms.DateField(
+        required=True, 
+        initial=datetime.date(2023, 1, 6),
+        widget=forms.DateInput(attrs={'class': 'form-control'})
+    )
+    comarca = forms.ChoiceField(
+        choices=[(query.pk, query.nome) for query in options],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
+    sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
+    defensores = []
+
+    def buscar_deferensores_do_banco_de_dados(self, comarca):
+        self.defensores = Defensor.objects.filter(comarca=comarca).order_by('?')
+
+    def sem_defensores(self):
+        return len(self.defensores) == 0
+
+    def sortear_por_periodo_e_bloco(self, comarca, data_inicial=None, data_final=None, salvar_ao_finalizar=False):
+        self.sorteios.clear()
+        self.buscar_deferensores_do_banco_de_dados(comarca)
+        if self.sem_defensores():
+            return
+        data_inicial = data_inicial if data_inicial != None else self.recesso_inicial
+        data_final = data_final if data_final != None else datetime.date(2022, 1, 6)
+        
+        periodo = rrule(DAILY, dtstart=data_inicial, until=data_final)
+        periodo = [dia.date() for dia in periodo]
+        quantidade_de_dias_cada = len(periodo) // len(self.defensores)
+        resto = len(periodo) % len(self.defensores)
+        
+        indice_do_dia = 0
+        indice_defensor = 0
+        while indice_do_dia < len(periodo):
+            if indice_defensor % 2 == 0 and resto > 0:
+                for _ in range(quantidade_de_dias_cada + 1):
+                    self.sorteios.append(Sorteio(data=periodo[indice_do_dia], defensor=self.defensores[indice_defensor]))
+                    indice_do_dia += 1
+            else:
+                for _ in range(quantidade_de_dias_cada):
+                    self.sorteios.append(Sorteio(data=periodo[indice_do_dia], defensor=self.defensores[indice_defensor]))
+                    indice_do_dia += 1
+            indice_defensor += 1
+            
+        if salvar_ao_finalizar:
+            self.salvar_sorteio()
+
+    def salvar_sorteio(self):
+        Sorteio.objects.filter(defensor__in=self.defensores).delete()
+        for sorteio in self.sorteios:
+            sorteio.save()
 
 
 class AfastamentoForm(forms.ModelForm):

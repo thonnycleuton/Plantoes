@@ -16,7 +16,7 @@
   <div class="">
     <div class="page-title">
       <div class="title_left">
-        <h3>2021 <small>06/01/2021 - 06/01/2022</small></h3>
+        <h3>2022 <small>06/01/2022 - 06/01/2023</small></h3>
       </div>
     </div>
 
@@ -53,6 +53,7 @@
                   <tr>
                     <td><a href="{% url 'sorteio:defensor_detail' defensor.pk %}">{{ forloop.counter }}</a></td>
                     <td><a href="/defensor/detalhes/{{defensor.id}}">{{ defensor.nome }}</a></td>
+                    <td>{{ defensor.comarca }}</td>
                     <td>{{ defensor.afastamentos.all.count }}</td>
                     <td>{{ defensor.quant_atuacao }}</td>
                   </tr>
@@ -63,6 +64,7 @@
                   <tr>
                     <th>Ordem</th>
                     <th>Defensor(a)</th>
+                    <th>Comarca</th>
                     <th>Afastamentos</th>
                     <th>Sorteios</th>
                   </tr>
