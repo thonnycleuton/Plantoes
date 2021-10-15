@@ -78,8 +78,16 @@ class Feriado(models.Model):
             hollidays = json.loads(url.read().decode())
 
         for holliday in hollidays:
-            comarca = Comarca.objects.get(pk=440)
-            Feriado.objects.create(data=holliday['date'], nome=holliday['name'], tipo=holliday['type'], descricao=holliday['description'], comarca=comarca)
+            # comarca = Comarca.objects.get(pk=440)
+            data_split = holliday['date'].split('/')
+            data = '{}-{}-{}'.format(data_split[2], data_split[1], data_split[0])
+            Feriado.objects.create(
+                data=data,
+                nome=holliday['name'],
+                # tipo=holliday['type'], 
+                # descricao=holliday['description'], 
+                # comarca=comarca
+            )
 
 
 class Sorteio(models.Model):
