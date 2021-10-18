@@ -4,6 +4,7 @@ from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
 from django import forms
 from django.db.models import query
 from sorteio.models import Comarca, Defensor, Sorteio, Feriado, Afastamento
+from django.contrib import messages
 
 
 class SorteioForm(forms.Form):
@@ -183,7 +184,8 @@ class SorteioForm(forms.Form):
         Sorteio.objects.filter(defensor__in=self.defensores).delete()
         for sorteio in self.sorteios:
             sorteio.save()
- 
+
+
 class SorteioBlocoPeriodoForm(forms.Form):
     # dados do formulário
     options = []
@@ -246,6 +248,7 @@ class SorteioBlocoPeriodoForm(forms.Form):
             
         if salvar_ao_finalizar:
             self.salvar_sorteio()
+            
 
     def salvar_sorteio(self):
         Sorteio.objects.filter(defensor__in=self.defensores).delete()

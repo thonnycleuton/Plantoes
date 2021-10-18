@@ -49,7 +49,14 @@ class SorteioBlocoPeriodoFormView(LoginRequiredMixin, FormView):
         inicio = form.cleaned_data['inicio']
         fim = form.cleaned_data['fim']
         comarca = Comarca.objects.filter(id=id_selecionado)
-        form.sortear_por_periodo_e_bloco(comarca=comarca[0], data_inicial=inicio, data_final=fim, salvar_ao_finalizar=True)
+        try:
+            form.sortear_por_periodo_e_bloco(comarca=comarca[0], data_inicial=inicio, data_final=fim, salvar_ao_finalizar=True)
+        except:
+            messages.add_message(
+                self.request, 
+                messages.INFO, 
+                message='Divisão dos dias não é possível entre a quantidade de defensores da comarca selecionada e o período informado.'
+            )
         return super().form_valid(form)
 
 

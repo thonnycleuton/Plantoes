@@ -47,6 +47,13 @@
             {% block top_navigation %}
                 <div class="top_nav">
                     {% include "sorteio/app/top_navigation.html" %}
+                    <div>
+                        {% if messages %}
+                        {% for message in messages %}
+                        <p style="color: #fff; padding-left: 8px;">{{message}}</p>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             {% endblock top_navigation %}
 
