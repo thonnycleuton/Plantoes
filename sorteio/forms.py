@@ -256,6 +256,74 @@ class SorteioBlocoPeriodoForm(forms.Form):
             sorteio.save()
 
 
+class SorteioParnaibaForm(forms.Form):
+    # dados do formulário
+    defensores = []
+    query = Defensor.objects.all()
+    for defensor in query:
+        defensores.append(defensor)
+
+    selecionados_recesso = forms.MultipleChoiceField(
+        choices=[(query.pk, query.nome) for query in defensores],
+    )
+
+    dt_inicial = datetime.date(2022, 1, 6)
+    dt_final = datetime.date(2022, 12, 19)
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
+    feriados = Feriado.objects.all()
+
+    # cria uma lista de dias úteis em um dado periodo
+    weekends = rrule(DAILY, dtstart=dt_inicial, until=dt_final, byweekday=(SA, SU))
+    recesso = rrule(DAILY, dtstart=recesso_inicial, until=recesso_final)
+
+    recesso_inicial = datetime.date(2022, 12, 20)
+    recesso_final = datetime.date(2023, 1, 5)
+    sorteios = [] # Os sorteios serão registrados na memória ram ao invés do disco rígido
+    defensores = []
+
+    def buscar_deferensores_do_banco_de_dados(self, comarca):
+        self.defensores = Defensor.objects.filter(comarca=comarca).order_by('?')
+
+    def sem_defensores(self):
+        return len(self.defensores) == 0
+
+    def sortear_por_periodo_e_bloco(self, comarca, data_inicial=None, data_final=None, salvar_ao_finalizar=False):
+        self.sorteios.clear()
+        self.buscar_deferensores_do_banco_de_dados(comarca)
+        if self.sem_defensores():
+            return
+        data_inicial = data_inicial if data_inicial != None else self.recesso_inicial
+        data_final = data_final if data_final != None else datetime.date(2022, 1, 6)
+        
+        periodo = rrule(DAILY, dtstart=data_inicial, until=data_final)
+        periodo = [dia.date() for dia in periodo]
+        quantidade_de_dias_cada = len(periodo) // len(self.defensores)
+        resto = len(periodo) % len(self.defensores)
+        
+        indice_do_dia = 0
+        indice_defensor = 0
+        while indice_do_dia < len(periodo):
+            if indice_defensor % 2 == 0 and resto > 0:
+                for _ in range(quantidade_de_dias_cada + 1):
+                    self.sorteios.append(Sorteio(data=periodo[indice_do_dia], defensor=self.defensores[indice_defensor]))
+                    indice_do_dia += 1
+            else:
+                for _ in range(quantidade_de_dias_cada):
+                    self.sorteios.append(Sorteio(data=periodo[indice_do_dia], defensor=self.defensores[indice_defensor]))
+                    indice_do_dia += 1
+            indice_defensor += 1
+            
+        if salvar_ao_finalizar:
+            self.salvar_sorteio()
+            
+
+    def salvar_sorteio(self):
+        Sorteio.objects.filter(defensor__in=self.defensores).delete()
+        for sorteio in self.sorteios:
+            sorteio.save()
+
+
 class AfastamentoForm(forms.ModelForm):
 
     class Meta:
@@ -272,9 +340,10 @@ class FeriadoForm(forms.ModelForm):
 
     class Meta:
         model = Feriado
-        exclude = ('impedidos', )
+        fields = ('data', 'nome', 'incluir_sorteio')
         widgets = {
             'data': forms.DateInput(attrs={"class": "form-control", "data-inputmask": "'mask': '99/99/9999'"}),
+            'nome': forms.TextInput(attrs={"class": "form-control"}),
         }
 
 class DefensorForm(forms.ModelForm):

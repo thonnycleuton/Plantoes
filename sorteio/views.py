@@ -60,6 +60,19 @@ class SorteioBlocoPeriodoFormView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
+class SorteioParnaibaFormView(LoginRequiredMixin, FormView):
+    login_url = '/usuario/entrar'
+    redirect_field_name = 'redirect_to'
+    form_class = SorteioParnaibaForm
+    template_name = 'sorteio/sorteio_bloco_periodo.html'
+    success_url = '/'
+    
+    def form_valid(self, form):
+        selecionados = form.cleaned_data['selecionados_recesso']
+        import pdb; pdb.set_trace()
+        return super().form_valid(form)
+
+
 class ComarcaList(ListView):
     model = Comarca
 
@@ -112,26 +125,46 @@ class DefensorDelete(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('sorteio:defensore_list')
 
 
-class FeriadoDetail(DetailView):
-    model = Feriado
-
-
 class FeriadoList(ListView):
     model = Feriado
     ordering = ['pk']
+
+
+class FeriadoDetail(DetailView):
+    model = Feriado
 
 
 class FeriadoFormView(LoginRequiredMixin, FormView):
     login_url = '/usuario/entrar'
     redirect_field_name = 'redirect_to'
     form_class = FeriadoForm
-    context_object_name = 'feriados'
+    model = Feriado
     template_name = 'sorteio/feriado_form.html'
     success_url = reverse_lazy('sorteio:feriado_list')
 
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
+
+
+class FeriadoEditarFormView(LoginRequiredMixin, UpdateView):
+    login_url = '/usuario/entrar'
+    redirect_field_name = 'redirect_to'
+    form_class = FeriadoForm
+    model = Feriado
+    template_name = 'sorteio/feriado_form.html'
+    success_url = reverse_lazy('sorteio:feriado_list')
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+
+class FeriadoDelete(LoginRequiredMixin, DeleteView):
+    login_url = '/usuario/entrar'
+    redirect_field_name = 'redirect_to'
+    model = Feriado
+    success_url = reverse_lazy('sorteio:feriado_list')
 
 
 class AfastamentoListView(ListView):

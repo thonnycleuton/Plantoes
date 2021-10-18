@@ -55,6 +55,7 @@
                   <td><a href="{% url 'sorteio:feriado_detail' feriado.pk %}">{{ feriado.pk }}</a></td>
                   <td><a href="{% url 'sorteio:feriado_detail' feriado.pk %}">{{ feriado.nome }}</a></td>
                   <td>{{ feriado.data|date:"D d M Y" }}</td>
+                  <td>{% if feriado.incluir_sorteio %} Sim {% else %} Não {% endif %}</td>
                 </tr>
                 {% empty %}
                 {% endfor %}
@@ -62,7 +63,9 @@
               <thead>
                 <tr>
                   <th>Feriado</th>
+                  <th>Nome</th>
                   <th>Data</th>
+                  <th>incluso nos sorteios</th>
                 </tr>
               </thead>
             </table>

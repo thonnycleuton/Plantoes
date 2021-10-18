@@ -65,6 +65,8 @@ class Feriado(models.Model):
     # descricao = models.CharField(max_length=100)
     # comarca = models.ForeignKey(Comarca)
     impedidos = models.CharField(max_length=300)
+    incluir_sorteio = models.BooleanField(default=False)
+    
 
     def __str__(self):
         return self.nome + " - " + str(self.data)
