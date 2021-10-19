@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 
 # Create your views here.
 from django.urls import reverse_lazy
-from django.views.generic import ListView, FormView, DetailView, CreateView
+from django.views.generic import ListView, FormView, DetailView
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView
+from django.contrib import messages
 
 from sorteio.forms import *
 from sorteio.models import *
-
+from sorteio.unit_forms.sorteio_aleatorio_forms import SorteioForm
+from sorteio.unit_forms.sorteio_bloco_periodo_forms import SorteioBlocoPeriodoForm
+from sorteio.unit_forms.sorteio_parnaiba_forms import SorteioParnaibaForm
 
 class Home(ListView):
     model = Sorteio
@@ -64,13 +63,13 @@ class SorteioParnaibaFormView(LoginRequiredMixin, FormView):
     login_url = '/usuario/entrar'
     redirect_field_name = 'redirect_to'
     form_class = SorteioParnaibaForm
-    template_name = 'sorteio/sorteio_bloco_periodo.html'
-    success_url = '/'
+    template_name = 'sorteio/sorteio_bloco_parnaiba.html'
+    success_url = reverse_lazy('sorteio:sorteio_parnaiba')
     
     def form_valid(self, form):
         selecionados = form.cleaned_data['selecionados_recesso']
-        import pdb; pdb.set_trace()
-        return super().form_valid(form)
+        sorteios = form.sortear(selecionados)
+        return render(self.request, 'sorteio/sorteio_bloco_parnaiba.html', {'sorteios': sorteios, 'form': self.form_class})
 
 
 class ComarcaList(ListView):

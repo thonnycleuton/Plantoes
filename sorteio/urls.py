@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
-from django.contrib.auth.views import PasswordChangeView, PasswordResetView, PasswordResetDoneView, \
-    PasswordResetConfirmView, PasswordResetCompleteView, LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 
 from sorteio.views import *
 
 urlpatterns = [
     url(r'^$', Home.as_view(), name='home'),
-    url(r'sorteio/parnaiba', SorteioParnaibaFormView.as_view(), name='sorteio_parnaiba'),
     url(r'sorteio/periodo', SorteioBlocoPeriodoFormView.as_view(), name='sorteio_bloco_periodo'),
+    url(r'sorteio/parnaiba', SorteioParnaibaFormView.as_view(), name='sorteio_parnaiba'),
     url(r'sorteio', SorteioFormView.as_view(), name='sorteio_form'),
     url(r'comarcas/', ComarcaList.as_view(), name='comarca_list'),
 
