@@ -2,7 +2,7 @@
 import datetime
 from dateutil.rrule import rrule, DAILY, MO, TU, WE, TH, FR, SA, SU
 from django import forms
-from sorteio.models import Comarca, Defensor, Sorteio, Feriado
+from sorteio.models import Comarca, Defensor, Sorteio, Feriado, Afastamento
 
 class SorteioForm(forms.Form):
     # dados do formulário

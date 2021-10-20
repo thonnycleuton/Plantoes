@@ -12,9 +12,6 @@ from django.contrib import messages
 
 from sorteio.forms import *
 from sorteio.models import *
-from sorteio.unit_forms.sorteio_aleatorio_forms import SorteioForm
-from sorteio.unit_forms.sorteio_bloco_periodo_forms import SorteioBlocoPeriodoForm
-from sorteio.unit_forms.sorteio_parnaiba_forms import SorteioParnaibaForm
 
 class Home(ListView):
     model = Sorteio
@@ -68,8 +65,17 @@ class SorteioParnaibaFormView(LoginRequiredMixin, FormView):
     
     def form_valid(self, form):
         selecionados = form.cleaned_data['selecionados_recesso']
-        sorteios = form.sortear(selecionados)
-        return render(self.request, 'sorteio/sorteio_bloco_parnaiba.html', {'sorteios': sorteios, 'form': self.form_class})
+        try:
+            sorteios = form.sortear(selecionados)
+            return render(self.request, 'sorteio/sorteio_bloco_parnaiba.html', {'sorteios': sorteios, 'form': self.form_class})
+        except:
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                message='Divisão dos dias não é possível entre a quantidade de defensores selecionados e o período de recesso.'
+            )
+        finally:
+            return render(self.request, 'sorteio/sorteio_bloco_parnaiba.html', {'form': self.form_class})
 
 
 class ComarcaList(ListView):
