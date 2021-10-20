@@ -19,6 +19,10 @@ class Comarca(models.Model):
     def minimo_de_defensores(self, valor):
         return len(self.defensores.all()) >= valor
 
+    @property
+    def total_defensores_vinculados(self):
+        return self.defensores.all().count()
+
     def __str__(self):
         return self.nome
 
@@ -41,6 +45,10 @@ class Defensor(models.Model):
 
     def quant_atuacao(self):
         return Sorteio.objects.filter(defensor=self).count()
+
+    @property
+    def quantidade_atuacao(self):
+        return self.sorteios.all().count()
 
     @staticmethod
     def populate():
@@ -94,7 +102,11 @@ class Feriado(models.Model):
 
 class Sorteio(models.Model):
     data = models.DateField()
-    defensor = models.ForeignKey(Defensor)
+    defensor = models.ForeignKey(Defensor, related_name='sorteios')
+
+    @property
+    def nome_comarca(self):
+        return self.defensor.comarca.nome
 
     def __str__(self):
         return str(self.data)
